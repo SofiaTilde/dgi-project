@@ -11,7 +11,13 @@ namespace Classes
     {
         public static void Main(string[] args)
         {
-            Program program = new Program();
+            Program program = new Program(int.Parse(args[0]), int.Parse(args[1]));
+        }
+
+        public static int Rand(int start, int end)
+        {
+            Random rand = new Random();
+            return rand.Next(start, end);
         }
     }
 
@@ -20,42 +26,81 @@ namespace Classes
         public SortedDictionary<string, Internode> internodes;
         public SortedDictionary<string, Petiole> petioles;
         public SortedDictionary<string, Leaf> leaves;
+        public int pot; //1=small, 2=medium, 3=big
+        public double plantRoughLength;
+        public int depth;
+        public int Age; //1 to 5
+        public int LightPower; //1 to 5
 
-        public Program()
+        public Program(int age, int lightPower)
         {
+            Age = age;
+            LightPower = lightPower;
+            Random rand = new Random();
+            depth = age * 2 + Start.Rand(0, 2);
             internodes = new SortedDictionary<string, Internode>();
             petioles = new SortedDictionary<string, Petiole>();
             leaves = new SortedDictionary<string, Leaf>();
             internodes.Add(
                 "a",
-                new Internode(1, 4, "a", 3, ref internodes, ref petioles, ref leaves)
+                new Internode(age, lightPower, "a", depth, ref internodes, ref petioles, ref leaves)
             );
 
+            plantRoughLength = 0;
             Console.WriteLine("Internodes:");
             foreach (KeyValuePair<string, Internode> kvp in internodes)
             {
-                Console.WriteLine(kvp.Key, " ", kvp.Value.ID);
+                Console.Write(kvp.Key + " " + kvp.Value.ID);
+                Console.Write(" Thic:" + kvp.Value.Thickness.ToString("0.###"));
+                Console.Write(" Len:" + kvp.Value.Length.ToString("0.###"));
+                Console.Write(" Ang:" + kvp.Value.Angle);
+                Console.Write(" Rot:" + kvp.Value.Rotation);
+                Console.WriteLine();
+                plantRoughLength += kvp.Value.Length;
             }
             Console.WriteLine("\nPetioles:");
             foreach (KeyValuePair<string, Petiole> kvp in petioles)
             {
-                Console.WriteLine(kvp.Key, " ", kvp.Value.ID);
+                Console.Write(kvp.Key + " " + kvp.Value.ID);
+                Console.Write(" ThicStart:" + kvp.Value.ThicknessStart.ToString("0.###"));
+                Console.Write(" ThicEnd:" + kvp.Value.ThicknessEnd.ToString("0.###"));
+                Console.Write(" Len:" + kvp.Value.Length.ToString("0.###"));
+                Console.Write(" Ang:" + kvp.Value.Angle);
+                Console.Write(" Rot:" + kvp.Value.Rotation);
+                Console.WriteLine();
             }
             Console.WriteLine("\nLeaves:");
             foreach (KeyValuePair<string, Leaf> kvp in leaves)
             {
-                Console.WriteLine(kvp.Key, " ", kvp.Value.ID);
+                Console.Write(kvp.Key + " " + kvp.Value.ID);
+                Console.Write(" ModelId:" + kvp.Value.LeafModelId);
+                Console.WriteLine();
+            }
+            if (plantRoughLength < 0.5)
+            {
+                pot = 1;
+            }
+            else if (plantRoughLength < 1.4)
+            {
+                pot = 2;
+            }
+            else
+            {
+                pot = 3;
             }
         }
     }
 
     public class Internode
     {
-        public (int, int) Size; //thickness, length
+        public double Thickness; //thickness, length
+        public double Length; //thickness, length
 
         //public Color MainColor;
         public string ID;
         public int Depth;
+        public int Angle; //0 to 45
+        public int Rotation; //-180 to 180
         public string PetioleId;
         public string InternodeId;
 
@@ -71,6 +116,10 @@ namespace Classes
         {
             ID = id;
             Depth = depth;
+            Length = 0.15 - (0.02 * lightPower);
+            Thickness = 0.005 + (0.005 * age);
+            Angle = Start.Rand(0, 45);
+            Rotation = Start.Rand(-180, 180);
             PetioleId = ID + "p";
             petioles.Add(
                 PetioleId,
@@ -84,7 +133,7 @@ namespace Classes
                     ref leaves
                 )
             );
-            if (depth != 0)
+            if (depth > 1)
             {
                 InternodeId = ((Char)(Convert.ToUInt16(ID[0]) + 1)).ToString();
                 internodes.Add(
@@ -109,10 +158,11 @@ namespace Classes
 
     public class Petiole
     {
-        public int Length;
-        public (int, int) Thickness; //start and end thickness
-        public int Angle; //-45 to 45
-        public int Rotation; //-180 to 180
+        public double Length;
+        public double ThicknessStart;
+        public double ThicknessEnd;
+        public int Angle; //15 to 60
+        public int Rotation; //20 to 90 or 200 to 270
 
         //public Color MainColor;
         public string ID;
@@ -131,14 +181,18 @@ namespace Classes
         {
             ID = id;
             Depth = depth;
-
-            if (depth == 0)
+            ThicknessStart = 0.005 + (0.005 * age);
+            ThicknessEnd = 0.9 * ThicknessStart; //todo 0.9 is placeholder
+            Length = 0.1625 + (0.0875 * age);
+            Angle = Start.Rand(15, 60);
+            Rotation = Start.Rand(20, 90);
+            if (depth % 2 == 0)
+            {
+                Rotation += 180;
+            }
+            if (depth == 1)
             {
                 Angle = 0;
-            }
-            else
-            {
-                //randomize angle
             }
             LeafId = ID + "l";
             leaves.Add(
@@ -159,7 +213,8 @@ namespace Classes
     public class Leaf
     {
         public (int, int) Holes;
-        public (int, int) Size; //width, height
+        public (double, double) Size; //width, height
+        public int LeafModelId; //1-10
 
         //public Color MainColor;
         //public Color VeinColor;
@@ -178,9 +233,16 @@ namespace Classes
         {
             ID = id;
             Depth = depth;
-            if (depth == 0)
+            LeafModelId = (age * 2) - (6 - lightPower) - (depth / 2) + Start.Rand(-1, 2);
+            if (LeafModelId < 1)
             {
-                //lighter color
+                //Console.WriteLine("id:" + LeafModelId);
+                LeafModelId = 1;
+            }
+            if (LeafModelId > 10)
+            {
+                //Console.WriteLine("id:" + LeafModelId);
+                LeafModelId = 10;
             }
         }
     }
