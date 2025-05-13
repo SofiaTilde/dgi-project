@@ -64,6 +64,7 @@ namespace Classes
                 Console.Write(kvp.Key + " " + kvp.Value.ID);
                 Console.Write(" ThicStart:" + kvp.Value.ThicknessStart.ToString("0.###"));
                 Console.Write(" ThicEnd:" + kvp.Value.ThicknessEnd.ToString("0.###"));
+                Console.Write(" Width:" + kvp.Value.WidthEnd.ToString("0.###"));
                 Console.Write(" Len:" + kvp.Value.Length.ToString("0.###"));
                 Console.Write(" Ang:" + kvp.Value.Angle);
                 Console.Write(" Rot:" + kvp.Value.Rotation);
@@ -76,11 +77,11 @@ namespace Classes
                 Console.Write(" ModelId:" + kvp.Value.LeafModelId);
                 Console.WriteLine();
             }
-            if (plantRoughLength < 0.5)
+            if (depth < 4)
             {
                 pot = 1;
             }
-            else if (plantRoughLength < 1.4)
+            else if (depth < 8)
             {
                 pot = 2;
             }
@@ -88,6 +89,7 @@ namespace Classes
             {
                 pot = 3;
             }
+            Console.WriteLine("\nPot: " + pot);
         }
     }
 
@@ -161,6 +163,7 @@ namespace Classes
         public double Length;
         public double ThicknessStart;
         public double ThicknessEnd;
+        public double WidthEnd;
         public int Angle; //15 to 60
         public int Rotation; //20 to 90 or 200 to 270
 
@@ -182,7 +185,7 @@ namespace Classes
             ID = id;
             Depth = depth;
             ThicknessStart = 0.005 + (0.005 * age);
-            ThicknessEnd = 0.9 * ThicknessStart; //todo 0.9 is placeholder
+            ThicknessEnd = 0.003 + 0.001 * age;
             Length = 0.1625 + (0.0875 * age);
             Angle = Start.Rand(15, 60);
             Rotation = Start.Rand(20, 90);
@@ -207,6 +210,8 @@ namespace Classes
                     ref leaves
                 )
             );
+            int LeafModelId = leaves[LeafId].LeafModelId;
+            WidthEnd = ThicknessEnd - 0.0028 + 0.0014 * LeafModelId;
         }
     }
 
