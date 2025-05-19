@@ -27,7 +27,7 @@ namespace Classes
         public SortedDictionary<string, Petiole> petioles;
         public SortedDictionary<string, Leaf> leaves;
         public int pot; //1=small, 2=medium, 3=big
-        public double plantRoughLength;
+        public float plantRoughLength;
         public int depth;
         public int Age; //1 to 5
         public int LightPower; //1 to 5
@@ -95,8 +95,8 @@ namespace Classes
 
     public class Internode
     {
-        public double Thickness; //thickness, length
-        public double Length; //thickness, length
+        public float Thickness; //thickness, length
+        public float Length; //thickness, length
 
         //public Color MainColor;
         public string ID;
@@ -160,10 +160,10 @@ namespace Classes
 
     public class Petiole
     {
-        public double Length;
-        public double ThicknessStart;
-        public double ThicknessEnd;
-        public double WidthEnd;
+        public float Length;
+        public float ThicknessStart;
+        public float ThicknessEnd;
+        public float WidthEnd;
         public int Angle; //15 to 60
         public int Rotation; //20 to 90 or 200 to 270
 
@@ -205,6 +205,8 @@ namespace Classes
                     lightPower,
                     LeafId,
                     depth - 1,
+                    Angle,
+                    Rotation,
                     ref internodes,
                     ref petioles,
                     ref leaves
@@ -218,19 +220,23 @@ namespace Classes
     public class Leaf
     {
         public (int, int) Holes;
-        public (double, double) Size; //width, height
+        public (float, float) Size; //width, height
         public int LeafModelId; //1-10
 
         //public Color MainColor;
         //public Color VeinColor;
         public string ID;
         public int Depth;
+        public int Angle;
+        public int Rotation;
 
         public Leaf(
             int age,
             int lightPower,
             string id,
             int depth,
+            int angle,
+            int rotation,
             ref SortedDictionary<string, Internode> internodes,
             ref SortedDictionary<string, Petiole> petioles,
             ref SortedDictionary<string, Leaf> leaves
@@ -238,6 +244,8 @@ namespace Classes
         {
             ID = id;
             Depth = depth;
+            Angle = angle;
+            Rotation = rotation;
             LeafModelId = (age * 2) - (6 - lightPower) - (depth / 2) + Start.Rand(-1, 2);
             if (LeafModelId < 1)
             {

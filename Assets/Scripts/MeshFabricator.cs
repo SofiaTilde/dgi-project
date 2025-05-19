@@ -95,7 +95,7 @@ public class MeshFabricator : MonoBehaviour
 
         foreach (KeyValuePair<string, Leaf> leaf in leaves)
         {
-            GenerateLeafMesh(leaf.Value, 0, 0, petiole_ends[leaf_count], vertices, triangles);
+            GenerateLeafMesh(leaf.Value, leaf.Angle, leaf.Rotation, petiole_ends[leaf_count], vertices, triangles);
         }
 
         Mesh mesh = GetComponent<MeshFilter>().mesh;
