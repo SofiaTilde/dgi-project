@@ -118,8 +118,8 @@ namespace Classes
         {
             ID = id;
             Depth = depth;
-            Length = 0.15 - (0.02 * lightPower);
-            Thickness = 0.005 + (0.005 * age);
+            Length = 0.15f - (0.02f * lightPower);
+            Thickness = 0.005f + (0.005f * age);
             Angle = Start.Rand(0, 45);
             Rotation = Start.Rand(-180, 180);
             PetioleId = ID + "p";
@@ -184,9 +184,9 @@ namespace Classes
         {
             ID = id;
             Depth = depth;
-            ThicknessStart = 0.005 + (0.005 * age);
-            ThicknessEnd = 0.003 + 0.001 * age;
-            Length = 0.1625 + (0.0875 * age);
+            ThicknessStart = 0.005f + (0.005f * age);
+            ThicknessEnd = 0.003f + 0.001f * age;
+            Length = 0.1625f + (0.0875f * age);
             Angle = Start.Rand(15, 60);
             Rotation = Start.Rand(20, 90);
             if (depth % 2 == 0)
@@ -213,7 +213,7 @@ namespace Classes
                 )
             );
             int LeafModelId = leaves[LeafId].LeafModelId;
-            WidthEnd = ThicknessEnd - 0.0028 + 0.0014 * LeafModelId;
+            WidthEnd = ThicknessEnd - 0.0028f + 0.0014f * LeafModelId;
         }
     }
 

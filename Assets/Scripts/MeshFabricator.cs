@@ -71,10 +71,10 @@ public class MeshFabricator : MonoBehaviour
     }
 
     //Generates the mesh of an entire Monstera Deliciosa specimen.
-    void GenereateSpecimenMesh(SortedDictionary<string, Internode> internodes, SortedDictionary<string, Petiole> petioles, SortedDictionary<string, Leaf> leaves)
+    public void GenerateSpecimenMesh(SortedDictionary<string, Internode> internodes, SortedDictionary<string, Petiole> petioles, SortedDictionary<string, Leaf> leaves)
     {
-        List<Vector3> vertices = new();
-        List<int> triangles = new();
+        List<Vector3> vertices = new List<Vector3>();
+        List<int> triangles = new List<int>();
 
         List<Vector3> internode_ends = new List<Vector3> { new Vector3(0, 0, 0) };
         List<Vector3> petiole_ends = new ();
@@ -95,7 +95,8 @@ public class MeshFabricator : MonoBehaviour
 
         foreach (KeyValuePair<string, Leaf> leaf in leaves)
         {
-            GenerateLeafMesh(leaf.Value, leaf.Angle, leaf.Rotation, petiole_ends[leaf_count], vertices, triangles);
+            GenerateLeafMesh(leaf.Value, petiole_ends[leaf_count], vertices, triangles);
+            leaf_count++;
         }
 
         Mesh mesh = GetComponent<MeshFilter>().mesh;
@@ -257,12 +258,12 @@ public class MeshFabricator : MonoBehaviour
         triangles.Add(vertice_index + 22);
     }
 
-    void GenerateLeafMesh(Leaf leaf, float angle, float rotation, Vector3 positions_start, List<Vector3> vertices, List<int> triangles)
+    void GenerateLeafMesh(Leaf leaf, Vector3 positions_start, List<Vector3> vertices, List<int> triangles)
     {
-        angle = angle * Mathf.Deg2Rad;
-        rotation = rotation * Mathf.Deg2Rad;
+        float angle = leaf.Angle * Mathf.Deg2Rad;
+        float rotation = leaf.Rotation * Mathf.Deg2Rad;
 
-        float width = 1;
+        float width = 0.2f;
 
         Matrix rotated_matrix = Rotate(angle, rotation);
 

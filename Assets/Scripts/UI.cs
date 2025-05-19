@@ -1,15 +1,17 @@
 using UnityEngine;
+using UnityEngine.UI;
 using Classes;
+using UnityEngine.UIElements;
 
 public class UI : MonoBehaviour
 {
-    public Button generate;
+    public UnityEngine.UI.Button generate;
     public GameObject specimen;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        Button.onClick.AddListener(OnClick);
+        generate.onClick.AddListener(OnClick);
     }
 
     // Update is called once per frame
@@ -20,7 +22,7 @@ public class UI : MonoBehaviour
 
     void OnClick()
     {
-        Program program = new Program(4, 5);
-        specimen.GenerateSpecimen(program.internodes, program.petioles, program.leaves);
+        Program program = new Program(5, 5);
+        specimen.GetComponent<MeshFabricator>().GenerateSpecimenMesh(program.internodes, program.petioles, program.leaves);
     }
 }
