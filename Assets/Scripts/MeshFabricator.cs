@@ -116,14 +116,14 @@ public class MeshFabricator : MonoBehaviour
 
         List<Vector3> positions = new();
 
-        positions.Add(positions_start + (rotated_matrix.y * -(float)internode.Thickness / 4));
-        positions.Add(positions_start + (rotated_matrix.y * ((float)internode.Length + (float)internode.Thickness / 4)));
-        positions.AddRange(OctagonPositions(positions_start, rotated_matrix, (float)internode.Thickness / 2));
-        positions.AddRange(OctagonPositions(positions_start + (rotated_matrix.y * (float)internode.Length), rotated_matrix, (float)internode.Thickness / 2));
+        positions.Add(positions_start + (rotated_matrix.y * -internode.Thickness / 4));
+        positions.Add(positions_start + (rotated_matrix.y * (internode.Length + internode.Thickness / 4)));
+        positions.AddRange(OctagonPositions(positions_start, rotated_matrix, internode.Thickness / 2));
+        positions.AddRange(OctagonPositions(positions_start + (rotated_matrix.y * internode.Length), rotated_matrix, internode.Thickness / 2));
 
         AddInternodeMeshComponents(positions.ToArray(), vertices, triangles);
 
-        return positions_start + (rotated_matrix.y * (float)internode.Length);
+        return positions_start + (rotated_matrix.y * internode.Length);
     }
 
     void AddInternodeMeshComponents(Vector3[] positions, List<Vector3> vertices, List<int> triangles)
@@ -169,13 +169,13 @@ public class MeshFabricator : MonoBehaviour
 
         List<Vector3> positions = new();
 
-        positions.AddRange(BasePositions(positions_start, rotated_matrix, (float)petiole.ThicknessStart / 2));
-        positions.AddRange(MiddlePositions(positions_start + rotated_matrix.x * (float)petiole.Length / 3, rotated_matrix, ((float)petiole.ThicknessStart + (float)petiole.ThicknessEnd) / 4));
-        positions.AddRange(EndPositions(positions_start + rotated_matrix.x * (float)petiole.Length, rotated_matrix, (float)petiole.ThicknessEnd / 2));
+        positions.AddRange(BasePositions(positions_start, rotated_matrix, petiole.ThicknessStart / 2));
+        positions.AddRange(MiddlePositions(positions_start + rotated_matrix.x * petiole.Length / 3, rotated_matrix, (petiole.ThicknessStart + petiole.ThicknessEnd) / 4));
+        positions.AddRange(EndPositions(positions_start + rotated_matrix.x * petiole.Length, rotated_matrix, petiole.ThicknessEnd / 2));
 
         AddPetioleMeshComponents(positions.ToArray(), vertices, triangles);
 
-        return positions_start + (rotated_matrix.x * (float)petiole.Length);
+        return positions_start + (rotated_matrix.x * petiole.Length);
     }
 
     void AddPetioleMeshComponents(Vector3[] positions, List<Vector3> vertices, List<int> triangles)
@@ -258,20 +258,22 @@ public class MeshFabricator : MonoBehaviour
         triangles.Add(vertice_index + 22);
     }
 
-    void GenerateLeafMesh(Leaf leaf, Vector3 positions_start, List<Vector3> vertices, List<int> triangles)
+    public void GenerateLeafMesh(Leaf leaf, Vector3 positions_start, List<Vector3> vertices, List<int> triangles)
     {
         float angle = leaf.Angle * Mathf.Deg2Rad;
         float rotation = leaf.Rotation * Mathf.Deg2Rad;
 
         float width = 0.2f;
+        float height = 0.2f;
 
         Matrix rotated_matrix = Rotate(angle, rotation);
 
         List<Vector3> positions = new();
 
-        positions.AddRange(LeafBasicPositions(positions_start + rotated_matrix.x * 0.01f, rotated_matrix, width));
+        positions.AddRange(LeafPositions(positions_start + rotated_matrix.x * 0.01f, rotated_matrix, width / 2, height));
+        positions.AddRange(LeafPositions(positions_start + rotated_matrix.x * 0.005f, rotated_matrix, width / 2, height));
 
-        AddLeafBasicMeshComponents(positions.ToArray(), vertices, triangles);
+        AddLeafMeshComponents(positions.ToArray(), vertices, triangles);
     }
 
     void AddLeafBasicMeshComponents(Vector3[] positions, List<Vector3> vertices, List<int> triangles)
@@ -292,6 +294,53 @@ public class MeshFabricator : MonoBehaviour
             triangles.Add(vertice_index + 12);
             triangles.Add(vertice_index + i + 2);
             triangles.Add(vertice_index + i + 1);
+        }
+    }
+
+    void AddLeafMeshComponents(Vector3[] positions, List<Vector3> vertices, List<int> triangles)
+    {
+        int vertice_index = vertices.Count;
+
+        for (int i = 0; i < 23; i++)
+        {
+            vertices.Add(positions[i]);
+        }
+
+        triangles.Add(vertice_index + 0);
+        triangles.Add(vertice_index + 11);
+        triangles.Add(vertice_index + 22);
+
+        for (int i = 0; i < 10; i++)
+        {
+            triangles.Add(vertice_index + 0);
+            triangles.Add(vertice_index + i + 1);
+            triangles.Add(vertice_index + i + 2);
+
+            triangles.Add(vertice_index + 22);
+            triangles.Add(vertice_index + i + 11);
+            triangles.Add(vertice_index + i + 12);
+        }
+
+        vertice_index = vertices.Count;
+
+        for (int i = 0; i < 23; i++)
+        {
+            vertices.Add(positions[i + 23]);
+        }
+
+        triangles.Add(vertice_index + 0);
+        triangles.Add(vertice_index + 22);
+        triangles.Add(vertice_index + 11);
+
+        for (int i = 0; i < 10; i++)
+        {
+            triangles.Add(vertice_index + 0);
+            triangles.Add(vertice_index + i + 2);
+            triangles.Add(vertice_index + i + 1);
+
+            triangles.Add(vertice_index + 22);
+            triangles.Add(vertice_index + i + 12);
+            triangles.Add(vertice_index + i + 11);
         }
     }
 
@@ -456,7 +505,61 @@ public class MeshFabricator : MonoBehaviour
             pos_center - rotation.z * width * 0.16f + rotation.y * width * 0.20f,
             pos_center - rotation.x * 0.01f,
         };
-        
+    }
+
+    List<Vector3> LeafPositions(Vector3 pos_center, Matrix rotation, float width, float height)
+    {
+        List<Vector3> positions = new();
+
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * +0.03f, height * +0.00f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * +0.10f, height * +0.12f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * +0.40f, height * +0.20f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * +0.70f, height * +0.18f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * +0.87f, height * +0.15f));
+
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * +1.00f, height * +0.08f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * +1.00f, height * -0.20f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * +0.90f, height * -0.40f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * +0.75f, height * -0.62f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * +0.40f, height * -0.88f));
+                                                                                                  
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * +0.07f, height * -0.97f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * +0.00f, height * -1.00f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * -0.07f, height * -0.97f));
+
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * -0.35f, height * -0.92f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * -0.70f, height * -0.68f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * -0.87f, height * -0.45f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * -0.95f, height * -0.25f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * -1.00f, height * -0.00f));
+
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * -0.90f, height * +0.10f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * -0.70f, height * +0.18f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * -0.40f, height * +0.20f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * -0.10f, height * +0.12f));
+        positions.Add(pos_center + LeafPosition(rotation, width, height, width * -0.03f, height * +0.00f));
+
+        return positions;
+    }
+
+    Vector3 LeafPosition(Matrix rotation, float width, float height, float pos_z, float pos_y)
+    {
+        float distance_from_center;
+
+        if (pos_y > 0)
+        {
+            distance_from_center = Mathf.Pow(pos_z / width, 2) + Mathf.Pow(pos_y / height, 2) / 0.04f;
+        }
+        else
+        {
+            distance_from_center = Mathf.Pow(pos_z / width, 2) + Mathf.Pow(pos_y / height, 2);
+        }
+
+        float depth = -0.2f * Mathf.Pow(distance_from_center, 2) + 0.16f * distance_from_center;
+
+        depth *= (height + width) / 2;
+
+        return rotation.z * pos_z + rotation.y * pos_y + rotation.x * depth;
     }
 
     void GenerateCube(Matrix rotation, List<Vector3> vertices, List<int> triangles)
