@@ -155,7 +155,7 @@ namespace Classes
             {
                 InternodeId = "";
                 petioles[ID + "p"].Angle = Angle;
-                petioles[ID + "p"].Rotation = Rotation;
+                petioles[ID + "p"].Rotation = 90;
             }
         }
     }
@@ -188,18 +188,13 @@ namespace Classes
             Depth = depth;
             ThicknessStart = 0.005f + (0.005f * age);
             ThicknessEnd = 0.003f + 0.001f * age;
-            Length = 0.1625f + (0.0875f * age);
+            Length = 0.1625f + (0.0875f * age) - (Depth * 0.025f);
             Angle = Start.Rand(15, 60);
-            Rotation = Start.Rand(20, 110);
+            Rotation = Start.Rand(135, 260);
             if (depth % 2 == 0)
             {
-                Rotation += 230;
+                Rotation += 145;
             }
-            // if (depth == 1)
-            // {
-            //     Angle = 0;
-            //     Rotation = 0;
-            // }
             LeafId = ID + "l";
             leaves.Add(
                 LeafId,
