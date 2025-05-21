@@ -95,8 +95,8 @@ namespace Classes
 
     public class Internode
     {
-        public float Thickness; //thickness, length
-        public float Length; //thickness, length
+        public float Thickness; //thickness
+        public float Length; //length
 
         //public Color MainColor;
         public string ID;
@@ -154,6 +154,8 @@ namespace Classes
             else
             {
                 InternodeId = "";
+                petioles[ID + "p"].Angle = Angle;
+                petioles[ID + "p"].Rotation = Rotation;
             }
         }
     }
@@ -165,7 +167,7 @@ namespace Classes
         public float ThicknessEnd;
         public float WidthEnd;
         public int Angle; //15 to 60
-        public int Rotation; //20 to 90 or 200 to 270
+        public int Rotation; //20 to 110 or 250 to 340
 
         //public Color MainColor;
         public string ID;
@@ -188,15 +190,16 @@ namespace Classes
             ThicknessEnd = 0.003f + 0.001f * age;
             Length = 0.1625f + (0.0875f * age);
             Angle = Start.Rand(15, 60);
-            Rotation = Start.Rand(20, 90);
+            Rotation = Start.Rand(20, 110);
             if (depth % 2 == 0)
             {
-                Rotation += 180;
+                Rotation += 230;
             }
-            if (depth == 1)
-            {
-                Angle = 0;
-            }
+            // if (depth == 1)
+            // {
+            //     Angle = 0;
+            //     Rotation = 0;
+            // }
             LeafId = ID + "l";
             leaves.Add(
                 LeafId,
@@ -220,6 +223,13 @@ namespace Classes
     public class Leaf
     {
         public (int, int) Holes;
+
+        /*
+        for 10 different holes
+        0-1 thickness (0%-100%)
+        0-1 length (0%-100%)
+        0-1 hole size (0%-100%)
+        */
         public (float, float) Size; //width, height
         public int LeafModelId; //1-10
 
