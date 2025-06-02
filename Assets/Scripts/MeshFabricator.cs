@@ -8,6 +8,7 @@ using System.CodeDom.Compiler;
 using System.Xml.Serialization;
 using UnityEditor;
 using UnityEngine.UIElements;
+using UnityEditor.UI;
 
 public class MeshFabricator : MonoBehaviour
 {
@@ -264,84 +265,152 @@ public class MeshFabricator : MonoBehaviour
         float angle = leaf.Angle * Mathf.Deg2Rad;
         float rotation = leaf.Rotation * Mathf.Deg2Rad;
 
-        float width = 0.2f;
-        float height = 0.2f;
+        float width = 2f;
+        float height = 2f;
 
         Matrix rotated_matrix = Rotate(angle, rotation);
 
-        List<Vector3> positions = new();
+        List<List<Vector3>> positions = new();
 
-        positions.AddRange(LeafPositions(positions_start + rotated_matrix.x * 0.01f, rotated_matrix, width / 2, height));
-        positions.AddRange(LeafPositions(positions_start + rotated_matrix.x * 0.005f, rotated_matrix, width / 2, height));
+        positions.AddRange(LeafPositions(positions_start + rotated_matrix.x * 0.01f, rotated_matrix, width / 2, height, 0.5f, 0.05f));
+        //positions.AddRange(LeafPositions(positions_start + rotated_matrix.x * 0.005f, rotated_matrix, width / 2, height, 0, 0));
 
-        AddLeafMeshComponents(positions.ToArray(), vertices, triangles);
+        AddLeafMeshComponents(positions, vertices, triangles);
     }
 
-    void AddLeafBasicMeshComponents(Vector3[] positions, List<Vector3> vertices, List<int> triangles)
+    void AddLeafMeshComponents(List<List<Vector3>> positions, List<Vector3> vertices, List<int> triangles)
     {
         int vertice_index = vertices.Count;
 
-        for (int i = 0; i < 13; i++)
-        {
-            vertices.Add(positions[i]);
-        }
+        vertices.AddRange(positions[0]);
+
+        List<int> connectors;
 
         for (int i = 0; i < 10; i++)
         {
-            triangles.Add(vertice_index + 0);
-            triangles.Add(vertice_index + i + 1);
-            triangles.Add(vertice_index + i + 2);
-
-            triangles.Add(vertice_index + 12);
-            triangles.Add(vertice_index + i + 2);
-            triangles.Add(vertice_index + i + 1);
-        }
-    }
-
-    void AddLeafMeshComponents(Vector3[] positions, List<Vector3> vertices, List<int> triangles)
-    {
-        int vertice_index = vertices.Count;
-
-        for (int i = 0; i < 23; i++)
-        {
-            vertices.Add(positions[i]);
+            vertices.AddRange(positions[i + 1]);
         }
 
-        triangles.Add(vertice_index + 0);
-        triangles.Add(vertice_index + 11);
-        triangles.Add(vertice_index + 22);
-
-        for (int i = 0; i < 10; i++)
+        for (int i = 0; i < 9; ++i)
         {
-            triangles.Add(vertice_index + 0);
-            triangles.Add(vertice_index + i + 1);
-            triangles.Add(vertice_index + i + 2);
+            connectors = new List<int>() { 4, 17, 10, 4, 5, 17, 13, 14, 18 };
+            for (int j = 0; j < 9; j++)
+            {
+                triangles.Add(vertice_index + 13 + i * 19 + connectors[j]);
+            }
 
-            triangles.Add(vertice_index + 22);
-            triangles.Add(vertice_index + i + 11);
-            triangles.Add(vertice_index + i + 12);
+            if (i != 4)
+            {
+                connectors = new List<int>()
+                {
+                    9 , 8 , 7 , 6 , 5 , 17, 16, 15, 14, 18,
+                    19, 20, 21, 22, 23, 29, 30, 31, 32, 37,
+                };
+
+                for (int j = 0; j < 9; j++)
+                {
+                    triangles.Add(vertice_index + 13 + i * 19 + connectors[j]);
+                    triangles.Add(vertice_index + 13 + i * 19 + connectors[j + 11]);
+                    triangles.Add(vertice_index + 13 + i * 19 + connectors[j + 1]);
+
+                    triangles.Add(vertice_index + 13 + i * 19 + connectors[j]);
+                    triangles.Add(vertice_index + 13 + i * 19 + connectors[j + 10]);
+                    triangles.Add(vertice_index + 13 + i * 19 + connectors[j + 11]);
+                }
+            }
         }
 
-        vertice_index = vertices.Count;
-
-        for (int i = 0; i < 23; i++)
+        for (int j = 0; j < 6; j++)
         {
-            vertices.Add(positions[i + 23]);
+            connectors = new List<int>()
+            {
+                9, 8, 7, 6, 5, 17, 16,
+                0, 1, 2, 3, 4, 10, 11,
+            };
+
+            triangles.Add(vertice_index + 13 + 4 * 19 + connectors[j]);
+            triangles.Add(vertice_index + 5);
+            triangles.Add(vertice_index + 13 + 4 * 19 + connectors[j + 1]);
+
+            triangles.Add(vertice_index + 13 + 5 * 19 + connectors[j + 7]);
+            triangles.Add(vertice_index + 13 + 5 * 19 + connectors[j + 8]);
+            triangles.Add(vertice_index + 7);
         }
 
-        triangles.Add(vertice_index + 0);
-        triangles.Add(vertice_index + 22);
-        triangles.Add(vertice_index + 11);
-
-        for (int i = 0; i < 10; i++)
+        connectors = new List<int>()
         {
-            triangles.Add(vertice_index + 0);
-            triangles.Add(vertice_index + i + 2);
-            triangles.Add(vertice_index + i + 1);
+            4, 13, 14,
+            4, 14, 15,
+            4, 15, 16,
+            3, 4, 16,
+            2, 3, 16,
+            2, 16, 17,
+            2, 17, 23,
+            2, 23, 24,
+            2, 24, 25,
+            1, 2, 25,
+            1, 25, 26,
+            0, 1, 26,
+            0, 26, 31,
+        };
 
-            triangles.Add(vertice_index + 22);
-            triangles.Add(vertice_index + i + 12);
-            triangles.Add(vertice_index + i + 11);
+        for (int i = 0; i < 39; i++)
+        {
+            triangles.Add(vertice_index + connectors[i]);
+        }
+
+        connectors = new List<int>()
+        {
+            8, 192, 193,
+            8, 191, 192,
+            8, 190, 191,
+            8, 9, 190,
+            9, 10, 190,
+            10, 189, 190,
+            10, 201, 189,
+            10, 200, 201,
+            10, 199, 200,
+            10, 11, 199,
+            11, 198, 199,
+            11, 12, 198,
+            12, 31, 198,
+        };
+
+        for (int i = 0; i < 39; i++)
+        {
+            triangles.Add(vertice_index + connectors[i]);
+        }
+
+        connectors = new List<int>()
+        {
+            0, 31, 12,
+            31, 202, 198,
+            189, 201, 188,
+            188, 201, 194,
+            198, 202, 197,
+        };
+
+        for (int i = 0; i < 15; i++)
+        {
+            triangles.Add(vertice_index + connectors[i]);
+        }
+
+        connectors = new List<int>()
+        {
+            105, 5, 6,
+            119, 6, 7,
+            119, 105, 6,
+            105, 119, 104,
+            104, 119, 120,
+            104, 120, 103,
+            103, 120, 121,
+            103, 121, 126,
+            103, 126, 107,
+        };
+
+        for (int i = 0; i < 27; i++)
+        {
+            triangles.Add(vertice_index + connectors[i]);
         }
     }
 
@@ -488,88 +557,92 @@ public class MeshFabricator : MonoBehaviour
         };
     }
 
-    List<Vector3> LeafBasicPositions(Vector3 pos_center, Matrix rotation, float width)
+    List<List<Vector3>> LeafPositions(Vector3 pos_center, Matrix rotation, float width, float height, float slit_length, float slit_thickness)
     {
-        return new List<Vector3>
-        {
-            pos_center,
-            pos_center + rotation.z * width * 0.16f + rotation.y * width * 0.20f,
-            pos_center + rotation.z * width * 0.33f + rotation.y * width * 0.20f,
-            pos_center + rotation.z * width * 0.50f,
-            pos_center + rotation.z * width * 0.50f - rotation.y * width * 0.5f,
-            pos_center + rotation.z * width * 0.33f - rotation.y * width * 0.75f,
-            pos_center - rotation.y * width * 1.00f,
-            pos_center - rotation.z * width * 0.33f - rotation.y * width * 0.75f,
-            pos_center - rotation.z * width * 0.50f - rotation.y * width * 0.50f,
-            pos_center - rotation.z * width * 0.50f,
-            pos_center - rotation.z * width * 0.33f + rotation.y * width * 0.20f,
-            pos_center - rotation.z * width * 0.16f + rotation.y * width * 0.20f,
-            pos_center - rotation.x * 0.01f,
-        };
+        List<List<Vector3>> positions = new();
+        List<Vector3> positions_basic = new();
+
+        positions_basic.Add(new Vector3(0, height * +0.00f, width * +0.03f));
+        positions_basic.Add(new Vector3(0, height * +0.12f, width * +0.10f));
+        positions_basic.Add(new Vector3(0, height * +0.20f, width * +0.40f));
+        positions_basic.Add(new Vector3(0, height * +0.18f, width * +0.70f));
+        positions_basic.Add(new Vector3(0, height * +0.15f, width * +0.87f));
+
+        positions_basic.Add(new Vector3(0, height * -0.97f, width * +0.07f));
+        positions_basic.Add(new Vector3(0, height * -1.00f, width * +0.00f));
+        positions_basic.Add(new Vector3(0, height * -0.97f, width * -0.07f));
+
+        positions_basic.Add(new Vector3(0, height * +0.10f, width * -0.90f));
+        positions_basic.Add(new Vector3(0, height * +0.18f, width * -0.70f));
+        positions_basic.Add(new Vector3(0, height * +0.20f, width * -0.40f));
+        positions_basic.Add(new Vector3(0, height * +0.12f, width * -0.10f));
+        positions_basic.Add(new Vector3(0, height * +0.00f, width * -0.03f));
+
+        positions_basic = BendPositions(positions_basic, pos_center, rotation, width, height);
+
+        positions.Add(positions_basic);
+
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * +0.08f, width * +1.00f), slit_length, slit_thickness, 25, 0, 0.8f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.20f, width * +1.00f), slit_length, slit_thickness, -5, 0, 0.8f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.40f, width * +0.90f), slit_length, slit_thickness, -20, 0, 0.8f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.62f, width * +0.75f), slit_length, slit_thickness, -35, 0, 0.8f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.88f, width * +0.40f), slit_length, slit_thickness, -65, 0, 0.8f), pos_center, rotation, width, height));
+        
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.92f, width * -0.35f), slit_length, slit_thickness, 245, 0, 0.8f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.68f, width * -0.70f), slit_length, slit_thickness, 215, 0, 0.8f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.45f, width * -0.87f), slit_length, slit_thickness, 200, 0, 0.8f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.25f, width * -0.95f), slit_length, slit_thickness, 185, 0, 0.8f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.00f, width * -1.00f), slit_length, slit_thickness, 160, 0, 0.8f), pos_center, rotation, width, height));
+
+        return positions;
     }
 
-    List<Vector3> LeafPositions(Vector3 pos_center, Matrix rotation, float width, float height)
-    {
-        List<Vector3> positions = new();
-
-        positions.Add(new Vector3(0, height * +0.00f, width * +0.03f));
-        positions.Add(new Vector3(0, height * +0.12f, width * +0.10f));
-        positions.Add(new Vector3(0, height * +0.20f, width * +0.40f));
-        positions.Add(new Vector3(0, height * +0.18f, width * +0.70f));
-        positions.Add(new Vector3(0, height * +0.15f, width * +0.87f));
-        
-        positions.Add(new Vector3(0, height * +0.08f, width * +1.00f));
-        positions.Add(new Vector3(0, height * -0.20f, width * +1.00f));
-        positions.Add(new Vector3(0, height * -0.40f, width * +0.90f));
-        positions.Add(new Vector3(0, height * -0.62f, width * +0.75f));
-        positions.Add(new Vector3(0, height * -0.88f, width * +0.40f));
-                                 
-        positions.Add(new Vector3(0, height * -0.97f, width * +0.07f));
-        positions.Add(new Vector3(0, height * -1.00f, width * +0.00f));
-        positions.Add(new Vector3(0, height * -0.97f, width * -0.07f));
-        
-        positions.Add(new Vector3(0, height * -0.92f, width * -0.35f));
-        positions.Add(new Vector3(0, height * -0.68f, width * -0.70f));
-        positions.Add(new Vector3(0, height * -0.45f, width * -0.87f));
-        positions.Add(new Vector3(0, height * -0.25f, width * -0.95f));
-        positions.Add(new Vector3(0, height * -0.00f, width * -1.00f));
-        
-        positions.Add(new Vector3(0, height * +0.10f, width * -0.90f));
-        positions.Add(new Vector3(0, height * +0.18f, width * -0.70f));
-        positions.Add(new Vector3(0, height * +0.20f, width * -0.40f));
-        positions.Add(new Vector3(0, height * +0.12f, width * -0.10f));
-        positions.Add(new Vector3(0, height * +0.00f, width * -0.03f));
-
-        List<Vector3> positions_bent = BendPositions(positions, rotation, width, height);
-
-        for (int i = 0; i < positions_bent.Count; i++)
-        {
-            positions_bent[i] += pos_center;
-        }
-
-        return positions_bent;
-    }
-
-    List<Vector3> LeafSlit(Vector3 pos_edge, float length, float thickness, float angle, float shear)
+    List<Vector3> LeafSlit(Vector3 pos_edge, float slit_length, float thickness, float angle, float shear, float hole_size)
     {
         List<Vector3> positions = new List<Vector3>();
 
         float sin = Mathf.Sin(angle * Mathf.Deg2Rad);
         float cos = Mathf.Cos(angle * Mathf.Deg2Rad);
+        float tan = Mathf.Tan(angle * Mathf.Deg2Rad);
 
-        positions.Add(pos_edge + new Vector3(0, +thickness * cos - shear * sin, +thickness * sin - shear * cos));
-        positions.Add(pos_edge + new Vector3(0, +thickness * cos - length / 2 * sin, +thickness * sin - length / 2 * cos));
-        positions.Add(pos_edge + new Vector3(0, +thickness * cos - length * sin, +thickness * sin - length * cos));
-        positions.Add(pos_edge + new Vector3(0, +thickness * 0.33f * cos - (length + thickness) * sin, +thickness * 0.33f * sin - (length + thickness) * cos));
-        positions.Add(pos_edge + new Vector3(0, -thickness * 0.33f * cos - (length + thickness) * sin, -thickness * 0.33f * sin - (length + thickness) * cos));
-        positions.Add(pos_edge + new Vector3(0, -thickness * cos - length * sin, -thickness * sin - length * cos));
-        positions.Add(pos_edge + new Vector3(0, -thickness * cos - length / 2 * sin, -thickness * sin - length / 2 * cos));
-        positions.Add(pos_edge + new Vector3(0, -thickness * cos + shear * sin, -thickness * sin + shear * cos));
+        float length = pos_edge.z / cos * slit_length;
+
+        Vector3 pos_hole = new(0, (pos_edge.y - tan * pos_edge.z + (pos_edge.y - sin * length)) / 2, (pos_edge.z - cos * length) / 2);
+
+        positions.Add(pos_edge + new Vector3(0, +thickness * cos - shear * sin, -thickness * sin - shear * cos));
+        positions.Add(pos_edge + new Vector3(0, +thickness * cos - (length * 1) / 3 * sin, -thickness * sin - (length * 1) / 3 * cos));
+        positions.Add(pos_edge + new Vector3(0, +thickness * cos - (length * 2) / 3 * sin, -thickness * sin - (length * 2) / 3 * cos));
+        positions.Add(pos_edge + new Vector3(0, +thickness * cos - (length * 3) / 3 * sin, -thickness * sin - (length * 3) / 3 * cos));
+        positions.Add(pos_edge + new Vector3(0, +thickness * 0.33f * cos - (length + thickness) * sin, -thickness * 0.33f * sin - (length + thickness) * cos));
+
+        positions.Add(pos_edge + new Vector3(0, -thickness * 0.33f * cos - (length + thickness) * sin, +thickness * 0.33f * sin - (length + thickness) * cos));
+        positions.Add(pos_edge + new Vector3(0, -thickness * cos - (length * 3) / 3 * sin, +thickness * sin - (length * 3) / 3 * cos));
+        positions.Add(pos_edge + new Vector3(0, -thickness * cos - (length * 2) / 3 * sin, +thickness * sin - (length * 2) / 3 * cos));
+        positions.Add(pos_edge + new Vector3(0, -thickness * cos - (length * 1) / 3 * sin, +thickness * sin - (length * 1) / 3 * cos));
+        positions.Add(pos_edge + new Vector3(0, -thickness * cos + shear * sin, +thickness * sin + shear * cos));
+
+
+        positions.Add(pos_hole + hole_size * new Vector3(0, +thickness * cos * 0.33f + thickness * sin * 1.60f, -thickness * sin * 0.33f + thickness * cos * 1.60f));
+        positions.Add(pos_hole + hole_size * new Vector3(0, +thickness * cos * 1.00f + thickness * sin * 1.00f, -thickness * sin * 1.00f + thickness * cos * 1.00f));
+        positions.Add(pos_hole + hole_size * new Vector3(0, +thickness * cos * 1.00f - thickness * sin * 1.00f, -thickness * sin * 1.00f - thickness * cos * 1.00f));
+        positions.Add(pos_hole + hole_size * new Vector3(0, +thickness * cos * 0.33f - thickness * sin * 1.60f, -thickness * sin * 0.33f - thickness * cos * 1.60f));
+
+        positions.Add(pos_hole + hole_size * new Vector3(0, -thickness * cos * 0.33f - thickness * sin * 1.60f, +thickness * sin * 0.33f - thickness * cos * 1.60f));
+        positions.Add(pos_hole + hole_size * new Vector3(0, -thickness * cos * 1.00f - thickness * sin * 1.00f, +thickness * sin * 1.00f - thickness * cos * 1.00f));
+        positions.Add(pos_hole + hole_size * new Vector3(0, -thickness * cos * 1.00f + thickness * sin * 1.00f, +thickness * sin * 1.00f + thickness * cos * 1.00f));
+        positions.Add(pos_hole + hole_size * new Vector3(0, -thickness * cos * 0.33f + thickness * sin * 1.60f, +thickness * sin * 0.33f + thickness * cos * 1.60f));
+
+
+        positions.Add(new Vector3(0, pos_edge.y - tan * pos_edge.z, 0));
+
+        //Debug.Log(pos_edge + new Vector3(0, +thickness * cos - shear * sin, +thickness * sin - shear * cos));
+        //Debug.Log(pos_edge + new Vector3(0, +thickness * cos - (length * 2) / 3 * sin, +thickness * sin - (length * 2) / 3 * cos));
+        //Debug.Log(pos_edge + new Vector3(0, +thickness * 0.33f * cos - (length + thickness) * sin, +thickness * 0.33f * sin - (length + thickness) * cos));
 
         return positions;
     }
 
-    List<Vector3> BendPositions(List<Vector3> positions, Matrix rotation, float width, float height)
+    List<Vector3> BendPositions(List<Vector3> positions, Vector3 pos_center, Matrix rotation, float width, float height)
     {
         List<Vector3> positions_bent = new();
 
@@ -586,11 +659,9 @@ public class MeshFabricator : MonoBehaviour
                 distance_from_center = Mathf.Pow(position.z / width, 2) + Mathf.Pow(position.y / height, 2);
             }
 
-            float depth = -0.2f * Mathf.Pow(distance_from_center, 2) + 0.16f * distance_from_center;
-
-            depth *= (height + width) / 2;
-
-            positions_bent.Add(rotation.z * position.z + rotation.y * position.y + rotation.x * depth);
+            float depth = 0;// -0.2f * Mathf.Pow(distance_from_center, 2) + 0.16f * distance_from_center;
+            //depth *= (height + width) / 2;
+            positions_bent.Add(pos_center + rotation.z * position.z + rotation.y * position.y + rotation.x * depth);
         }
 
         return positions_bent;
