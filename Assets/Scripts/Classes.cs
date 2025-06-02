@@ -1,5 +1,5 @@
 //using JetBrains.Annotations;
-//using UnityEngine;
+using UnityEngine;
 using System;
 using System.Collections.Generic;
 
@@ -16,7 +16,7 @@ namespace Classes
 
         public static int Rand(int start, int end)
         {
-            Random rand = new Random();
+            System.Random rand = new System.Random();
             return rand.Next(start, end);
         }
     }
@@ -31,12 +31,15 @@ namespace Classes
         public int depth;
         public int Age; //1 to 5
         public int LightPower; //1 to 5
+        private GameObject smallPot;
+        private GameObject mediumPot;
+        private GameObject largePot;
 
         public Program(int age, int lightPower)
         {
             Age = age;
             LightPower = lightPower;
-            Random rand = new Random();
+            System.Random rand = new System.Random();
             depth = age * 2 + Start.Rand(0, 2);
             internodes = new SortedDictionary<string, Internode>();
             petioles = new SortedDictionary<string, Petiole>();
@@ -77,17 +80,30 @@ namespace Classes
                 Console.Write(" ModelId:" + kvp.Value.LeafModelId);
                 Console.WriteLine();
             }
+
+            smallPot = GameObject.Find("small_pot");
+            mediumPot = GameObject.Find("medium_pot");
+            largePot = GameObject.Find("large_pot");
             if (depth < 4)
             {
                 pot = 1;
+                smallPot.GetComponent<Renderer>().enabled = true;
+                mediumPot.GetComponent<Renderer>().enabled = false;
+                largePot.GetComponent<Renderer>().enabled = false;
             }
             else if (depth < 8)
             {
                 pot = 2;
+                smallPot.GetComponent<Renderer>().enabled = false;
+                mediumPot.GetComponent<Renderer>().enabled = true;
+                largePot.GetComponent<Renderer>().enabled = false;
             }
             else
             {
                 pot = 3;
+                smallPot.GetComponent<Renderer>().enabled = false;
+                mediumPot.GetComponent<Renderer>().enabled = false;
+                largePot.GetComponent<Renderer>().enabled = true;
             }
             Console.WriteLine("\nPot: " + pot);
         }
