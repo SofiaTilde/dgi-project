@@ -265,22 +265,24 @@ public class MeshFabricator : MonoBehaviour
         float angle = leaf.Angle * Mathf.Deg2Rad;
         float rotation = leaf.Rotation * Mathf.Deg2Rad;
 
-        float width = 2f;
-        float height = 2f;
+        float slit_length = 0.6f;
+        float slit_thickness = 0.05f;
 
         Matrix rotated_matrix = Rotate(angle, rotation);
 
         List<List<Vector3>> positions = new();
 
-        positions.AddRange(LeafPositions(positions_start + rotated_matrix.x * 0.01f, rotated_matrix, width / 2, height, 0.5f, 0.05f));
+        positions.AddRange(LeafPositions(positions_start + rotated_matrix.x * 0.01f, rotated_matrix, leaf.Size.Item1 / 2, leaf.Size.Item2, slit_length, slit_thickness));
         //positions.AddRange(LeafPositions(positions_start + rotated_matrix.x * 0.005f, rotated_matrix, width / 2, height, 0, 0));
 
-        AddLeafMeshComponents(positions, vertices, triangles);
+        AddLeafMeshComponents(positions, vertices, triangles, false);
+        AddLeafMeshComponents(positions, vertices, triangles, true);
     }
 
-    void AddLeafMeshComponents(List<List<Vector3>> positions, List<Vector3> vertices, List<int> triangles)
+    void AddLeafMeshComponents(List<List<Vector3>> positions, List<Vector3> vertices, List<int> triangles, bool invert)
     {
         int vertice_index = vertices.Count;
+        int triangle_index = triangles.Count;
 
         vertices.AddRange(positions[0]);
 
@@ -411,6 +413,17 @@ public class MeshFabricator : MonoBehaviour
         for (int i = 0; i < 27; i++)
         {
             triangles.Add(vertice_index + connectors[i]);
+        }
+
+        if (invert)
+        {
+            int new_triangles = triangles.Count - triangle_index;
+            for (int t = 0; t < new_triangles; t += 3)
+            {
+                int temp = triangles[t];
+                triangles[t] = triangles[t + 1];
+                triangles[t + 1] = temp;
+            }
         }
     }
 
@@ -563,7 +576,7 @@ public class MeshFabricator : MonoBehaviour
         List<Vector3> positions_basic = new();
 
         positions_basic.Add(new Vector3(0, height * +0.00f, width * +0.03f));
-        positions_basic.Add(new Vector3(0, height * +0.12f, width * +0.10f));
+        positions_basic.Add(new Vector3(0, height * +0.18f, width * +0.10f));
         positions_basic.Add(new Vector3(0, height * +0.20f, width * +0.40f));
         positions_basic.Add(new Vector3(0, height * +0.18f, width * +0.70f));
         positions_basic.Add(new Vector3(0, height * +0.15f, width * +0.87f));
@@ -575,24 +588,24 @@ public class MeshFabricator : MonoBehaviour
         positions_basic.Add(new Vector3(0, height * +0.10f, width * -0.90f));
         positions_basic.Add(new Vector3(0, height * +0.18f, width * -0.70f));
         positions_basic.Add(new Vector3(0, height * +0.20f, width * -0.40f));
-        positions_basic.Add(new Vector3(0, height * +0.12f, width * -0.10f));
+        positions_basic.Add(new Vector3(0, height * +0.18f, width * -0.10f));
         positions_basic.Add(new Vector3(0, height * +0.00f, width * -0.03f));
 
         positions_basic = BendPositions(positions_basic, pos_center, rotation, width, height);
 
         positions.Add(positions_basic);
 
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * +0.08f, width * +1.00f), slit_length, slit_thickness, 25, 0, 0.8f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * +0.08f, width * +1.00f), slit_length, slit_thickness, 25, 0, 0f), pos_center, rotation, width, height));
         positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.20f, width * +1.00f), slit_length, slit_thickness, -5, 0, 0.8f), pos_center, rotation, width, height));
         positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.40f, width * +0.90f), slit_length, slit_thickness, -20, 0, 0.8f), pos_center, rotation, width, height));
         positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.62f, width * +0.75f), slit_length, slit_thickness, -35, 0, 0.8f), pos_center, rotation, width, height));
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.88f, width * +0.40f), slit_length, slit_thickness, -65, 0, 0.8f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.88f, width * +0.40f), slit_length, slit_thickness, -65, 0, 0f), pos_center, rotation, width, height));
         
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.92f, width * -0.35f), slit_length, slit_thickness, 245, 0, 0.8f), pos_center, rotation, width, height));
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.68f, width * -0.70f), slit_length, slit_thickness, 215, 0, 0.8f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.92f, width * -0.35f), slit_length, slit_thickness, 245, 0, 0f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.68f, width * -0.70f), slit_length, slit_thickness, 215, 0, 0f), pos_center, rotation, width, height));
         positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.45f, width * -0.87f), slit_length, slit_thickness, 200, 0, 0.8f), pos_center, rotation, width, height));
         positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.25f, width * -0.95f), slit_length, slit_thickness, 185, 0, 0.8f), pos_center, rotation, width, height));
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.00f, width * -1.00f), slit_length, slit_thickness, 160, 0, 0.8f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.00f, width * -1.00f), slit_length, slit_thickness, 160, 0, 0f), pos_center, rotation, width, height));
 
         return positions;
     }
@@ -659,8 +672,9 @@ public class MeshFabricator : MonoBehaviour
                 distance_from_center = Mathf.Pow(position.z / width, 2) + Mathf.Pow(position.y / height, 2);
             }
 
-            float depth = 0;// -0.2f * Mathf.Pow(distance_from_center, 2) + 0.16f * distance_from_center;
-            //depth *= (height + width) / 2;
+            float magnitude = 0.4f;
+            float depth = -magnitude * Mathf.Pow(distance_from_center, 2) + 0.8f * magnitude * distance_from_center;
+            depth *= (height + width) / 2;
             positions_bent.Add(pos_center + rotation.z * position.z + rotation.y * position.y + rotation.x * depth);
         }
 
