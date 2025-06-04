@@ -833,9 +833,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   generate: {fileID: 565696854}
+  reGenerate: {fileID: 0}
   sliderAge: {fileID: 327180904}
   sliderLight: {fileID: 446800325}
   specimen: {fileID: 984679203}
+  light: {fileID: 606762621}
   ageValue: 0
   lightValue: 0
 --- !u!1 &857988330

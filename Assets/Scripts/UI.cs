@@ -6,9 +6,11 @@ using UnityEngine.UIElements;
 public class UI : MonoBehaviour
 {
     public UnityEngine.UI.Button generate;
+    public UnityEngine.UI.Button reGenerate;
     public UnityEngine.UI.Slider sliderAge;
     public UnityEngine.UI.Slider sliderLight;
     public GameObject specimen;
+    public GameObject light;
     public int ageValue;
     public int lightValue;
 
@@ -24,6 +26,7 @@ public class UI : MonoBehaviour
         // Set variables to values of age- and lightslider
         ageValue = (int)sliderAge.value;
         lightValue = (int)sliderLight.value;
+        light.GetComponent<Light>().intensity = lightValue * 0.2f + 0.5f;
     }
 
     void OnClick()
