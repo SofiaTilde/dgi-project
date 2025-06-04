@@ -156,7 +156,7 @@ namespace Classes
                     age,
                     lightPower,
                     PetioleId,
-                    depth - 1,
+                    depth,
                     ref internodes,
                     ref petioles,
                     ref leaves
@@ -230,7 +230,7 @@ namespace Classes
                     age,
                     lightPower,
                     LeafId,
-                    depth - 1,
+                    depth,
                     Angle,
                     Rotation,
                     ref internodes,
@@ -304,13 +304,47 @@ namespace Classes
                     Holes[i] = 0;
                 }
             }
-            //todo use id to change the lower leafs
+            int reverseDepth = Convert.ToUInt16(ID[0]) - Convert.ToUInt16('a') + 1;
+            /*
+            ID       Depth    reverseDepth    percentOfPlant
+            --------------------------------------------------
+            kpl        1        11               1.0
+            jpl        2        10               0.91
+            ipl        3        9                0.82
+            hpl        4        8                0.73
+            gpl        5        7                0.64
+            fpl        6        6                0.55
+            epl        7        5                0.45
+            dpl        8        4                0.36
+            cpl        9        3                0.27
+            bpl        10       2                0.18
+            apl        11       1                0.09
+            
+            fpl        1        6                1.0
+            epl        2        5                0.83
+            dpl        3        4                0.67
+            cpl        4        3                0.5
+            bpl        5        2                0.33
+            apl        6        1                0.17
+
+            cpl        1        3                1.0
+            bpl        2        2                0.67
+            apl        3        1                0.33
+            */
+            int highestDepth = Depth + reverseDepth - 1;
+            float percentOfPlant = ((float)reverseDepth) / ((float)highestDepth);
+
             ThicknessFenestrations = hole;
-            if (ThicknessFenestrations < 0.3f)
+            LengthFenestrations = (hole / 10) * reverseDepth * 0.60f;
+            if (
+                ThicknessFenestrations < 0.3f
+                || LengthFenestrations < 0.0f
+                || percentOfPlant < 0.34f
+            )
             {
                 ThicknessFenestrations = 0.0f;
+                LengthFenestrations = 0.0f;
             }
-            LengthFenestrations = ThicknessFenestrations * 0.60f;
         }
     }
 }
