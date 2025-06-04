@@ -182,8 +182,9 @@ namespace Classes
             else
             {
                 InternodeId = "";
-                petioles[ID + "p"].Angle = Angle;
-                petioles[ID + "p"].Rotation = 90;
+                Angle = 90;
+                petioles[ID + "p"].Angle = 90;
+                leaves[ID + "pl"].Angle = 90;
             }
         }
     }
