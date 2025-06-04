@@ -183,7 +183,6 @@ namespace Classes
             {
                 InternodeId = "";
                 petioles[ID + "p"].Angle = 90;
-                //leaves[ID + "pl"].Angle = 90;
             }
         }
     }
@@ -288,7 +287,7 @@ namespace Classes
             Height = 1.1f * Width;
 
             Holes = new float[10];
-            float hole = Width / 40;
+            float hole = Width / 0.40f;
             for (int i = 0; i < 10; i++)
             {
                 Holes[i] = hole - (i * 0.14f);
