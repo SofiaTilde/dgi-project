@@ -283,21 +283,21 @@ namespace Classes
             Rotation = rotation;
 
             // Generate values for leaf measurements
-            Width = 0.0875f + (age * 0.0625f) - (Depth * 0.0025f); // Test values
+            Width = 0.0875f + (age * 0.0625f) - (Depth * 0.025f); // Test values
             Height = 1.1f * Width;
 
             Holes = new float[10];
             float hole = Width / 0.40f;
-            for (int i = 0; i < 10; i++)
+            for (int i = 2; i < 10; i++)
             {
-                Holes[i] = hole - (i * 0.14f);
+                Holes[i] = hole - (i * 0.04f);
                 if (Holes[i] < 0)
                 {
                     Holes[i] = 0;
                 }
             }
             ThicknessFenestrations = hole;
-            if (ThicknessFenestrations < 0.15f)
+            if (ThicknessFenestrations < 0.3f)
             {
                 ThicknessFenestrations = 0.0f;
             }
