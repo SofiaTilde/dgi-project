@@ -287,21 +287,30 @@ namespace Classes
             Height = 1.1f * Width;
 
             Holes = new float[10];
-            float hole = Width / 0.40f;
+            float hole = Width / 0.40f * 0.85f;
+            if (Width < 0.3f)
+            {
+                hole = Width / 0.30f;
+            }
+            if (Width < 0.2f)
+            {
+                hole = Width / 0.20f;
+            }
             for (int i = 2; i < 10; i++)
             {
-                Holes[i] = hole - (i * 0.04f);
-                if (Holes[i] < 0)
+                Holes[i] = hole - (i * 0.08f);
+                if (Holes[i] < 0.5f * hole)
                 {
                     Holes[i] = 0;
                 }
             }
+            //todo use id to change the lower leafs
             ThicknessFenestrations = hole;
             if (ThicknessFenestrations < 0.3f)
             {
                 ThicknessFenestrations = 0.0f;
             }
-            LengthFenestrations = ThicknessFenestrations;
+            LengthFenestrations = ThicknessFenestrations * 0.60f;
         }
     }
 }
