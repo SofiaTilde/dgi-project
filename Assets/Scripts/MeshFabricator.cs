@@ -58,8 +58,6 @@ public class MeshFabricator : MonoBehaviour
         foreach (KeyValuePair<string, Leaf> leaf in leaves)
         {
             GenerateLeafMesh(leaf.Value, petiole_ends[leaf_count], vertices, triangles);
-            Debug.Log(leaf.Value.LengthFenestrations);
-            Debug.Log(leaf.Value.ThicknessFenestrations);
             leaf_count++;
         }
 
@@ -239,7 +237,7 @@ public class MeshFabricator : MonoBehaviour
 
         positions.AddRange(LeafPositions(positions_start + rotated_matrix.x * 0.01f, rotated_matrix, width, height, slit_length, slit_thickness, holes));
 
-        //AddLeafMeshComponents(positions, vertices, triangles, false);
+        AddLeafMeshComponents(positions, vertices, triangles, false);
         AddLeafMeshComponents(positions, vertices, triangles, true);
     }
 
@@ -381,8 +379,8 @@ public class MeshFabricator : MonoBehaviour
 
         if (invert)
         {
-            int new_triangles = triangles.Count - triangle_index;
-            for (int t = 0; t < new_triangles; t += 3)
+            int new_triangles = triangles.Count;
+            for (int t = triangle_index; t < new_triangles; t += 3)
             {
                 int temp = triangles[t];
                 triangles[t] = triangles[t + 1];
