@@ -182,7 +182,6 @@ namespace Classes
             else
             {
                 InternodeId = "";
-                Angle = 90;
                 petioles[ID + "p"].Angle = 90;
                 leaves[ID + "pl"].Angle = 90;
             }
