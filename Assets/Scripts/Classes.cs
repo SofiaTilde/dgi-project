@@ -82,7 +82,7 @@ namespace Classes
             foreach (KeyValuePair<string, Leaf> kvp in leaves)
             {
                 Console.Write(kvp.Key + " " + kvp.Value.ID);
-                Console.Write(" ModelId:" + kvp.Value.LeafModelId);
+                //Console.Write(" ModelId:" + kvp.Value.LeafModelId);
                 Console.WriteLine();
             }
 
@@ -123,12 +123,12 @@ namespace Classes
         public float Thickness; //thickness
         public float Length; //length
 
-        public string ID;   // ID/name of the current internode
-        public int Depth;   
-        public int Angle;   // 0 to 45, angle of internode in z-axis 
-        public int Rotation;    // -180 to 180, angle of internode in x/y-axis
-        public string PetioleId;    // ID for the petiole of this internode, which is the current internode's ID + 'p' for 'p'etiole
-        public string InternodeId;  // ID for the next internode following this internode, '' if no more internodes. 
+        public string ID; // ID/name of the current internode
+        public int Depth;
+        public int Angle; // 0 to 45, angle of internode in z-axis
+        public int Rotation; // -180 to 180, angle of internode in x/y-axis
+        public string PetioleId; // ID for the petiole of this internode, which is the current internode's ID + 'p' for 'p'etiole
+        public string InternodeId; // ID for the next internode following this internode, '' if no more internodes.
 
         public Internode(
             int age,
@@ -194,7 +194,7 @@ namespace Classes
         public float ThicknessStart;
         public float ThicknessEnd;
         public float WidthEnd;
-        public int Angle; // 15 to 60, angle of petiole in z-axis 
+        public int Angle; // 15 to 60, angle of petiole in z-axis
         public int Rotation; // 20 to 110 or 250 to 340, angle of petiole in x/y-axis
 
         public string ID; // ID/name of the current petiole
@@ -239,22 +239,27 @@ namespace Classes
                     ref leaves
                 )
             );
-            int LeafModelId = leaves[LeafId].LeafModelId;
-            WidthEnd = ThicknessEnd - 0.0028f + 0.0014f * LeafModelId;
+            // int LeafModelId = leaves[LeafId].LeafModelId;
+            // WidthEnd = ThicknessEnd - 0.0028f + 0.0014f * LeafModelId;
         }
     }
 
     public class Leaf
     {
-        public (int, int) Holes;
+        public float[] Holes; //10 different 0-1 hole size (0-100%)
+
         /*
-        for 10 different holes
-        0-1 thickness (0%-100%)
-        0-1 length (0%-100%)
-        0-1 hole size (0%-100%)
+             ||
+        0(         )1
+         2(       )3
+          4(     )5
+           6(   )7
+            8( )9
         */
-        public (float, float) Size; //width, height
-        public int LeafModelId; //1-10
+        public float ThicknessFenestrations; // thickness of fenestrations 0-1 thickness (0-100%)
+        public float LengthFenestrations; // length of fenestrations 0-1 length (0-100%)
+        public float Width; // width of whole leaf
+        public float Height; // height of whole leaf
 
         public string ID; // ID/name of the current leaf
         public int Depth;
@@ -278,18 +283,26 @@ namespace Classes
             Angle = angle;
             Rotation = rotation;
 
-            // Generate measurements for current leaf
-            LeafModelId = (age * 2) - (6 - lightPower) - (depth / 2) + Start.Rand(-1, 2);
-            if (LeafModelId < 1)
+            // Generate values for leaf measurements
+            Width = 0.0875f + (age * 0.0625f) - (Depth * 0.0025f); // Test values
+            Height = 1.1f * Width;
+
+            Holes = new float[10];
+            float hole = Width / 40;
+            for (int i = 0; i < 10; i++)
             {
-                //Console.WriteLine("id:" + LeafModelId);
-                LeafModelId = 1;
+                Holes[i] = hole - (i * 0.14f);
+                if (Holes[i] < 0)
+                {
+                    Holes[i] = 0;
+                }
             }
-            if (LeafModelId > 10)
+            ThicknessFenestrations = hole;
+            if (ThicknessFenestrations < 0.15f)
             {
-                //Console.WriteLine("id:" + LeafModelId);
-                LeafModelId = 10;
+                ThicknessFenestrations = 0.0f;
             }
+            LengthFenestrations = ThicknessFenestrations;
         }
     }
 }
