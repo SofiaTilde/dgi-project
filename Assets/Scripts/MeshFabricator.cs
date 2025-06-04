@@ -24,47 +24,7 @@ public class MeshFabricator : MonoBehaviour
 
     void Start()
     {
-        /*
-        SortedDictionary<string, Internode> internodes = new SortedDictionary<string, Internode>();
-        SortedDictionary<string, Petiole> petioles = new SortedDictionary<string, Petiole>();
-        SortedDictionary<string, Leaf> leaves = new SortedDictionary<string, Leaf>();
-        Internode i1 = new(1, 1, "I1", 1, ref internodes, ref petioles, ref leaves);
-        Internode i2 = new(1, 1, "I2", 1, ref internodes, ref petioles, ref leaves);
-        Petiole   p1 = new(1, 1, "P1", 1, ref internodes, ref petioles, ref leaves);
-        Leaf      l1 = new(1, 1, "L1", 1, ref internodes, ref petioles, ref leaves);
-
-        i1.Thickness = 0.2;
-        i1.Length = 0.5;
-        i1.Angle = 45;
-        i1.Rotation = 45;
-
-        i2.Thickness = 0.2;
-        i2.Length = 0.5;
-        i2.Angle = 12;
-        i2.Rotation = -30;
-
-        p1.ThicknessStart = 0.20;
-        p1.ThicknessEnd = 0.10;
-        p1.Length = 2;
-        p1.Angle = i1.Angle + 10;
-        p1.Rotation = i2.Rotation;
-
-        List<Vector3> vertices = new();
-        List<int> triangles = new();
-
-        Vector3 next;
-        next = GenerateInternodeMesh(i1, new Vector3(0, 0, 0), vertices, triangles);
-        GenerateInternodeMesh(i2, next, vertices, triangles);
-
-        Vector3 pos_leaf = GeneratePetioleMesh(p1, next, vertices, triangles);
-        GenerateLeafMesh(l1, p1.Angle, p1.Rotation, pos_leaf, vertices, triangles);
-
-        Mesh mesh = GetComponent<MeshFilter>().mesh;
-        mesh.vertices = vertices.ToArray();
-        mesh.triangles = triangles.ToArray();
-        mesh.RecalculateNormals();
-        mesh.RecalculateTangents();
-        */
+        
     }
 
     void Update()
@@ -98,6 +58,8 @@ public class MeshFabricator : MonoBehaviour
         foreach (KeyValuePair<string, Leaf> leaf in leaves)
         {
             GenerateLeafMesh(leaf.Value, petiole_ends[leaf_count], vertices, triangles);
+            Debug.Log(leaf.Value.LengthFenestrations);
+            Debug.Log(leaf.Value.ThicknessFenestrations);
             leaf_count++;
         }
 
@@ -265,17 +227,19 @@ public class MeshFabricator : MonoBehaviour
         float angle = leaf.Angle * Mathf.Deg2Rad;
         float rotation = leaf.Rotation * Mathf.Deg2Rad;
 
-        float slit_length = 0.6f;
-        float slit_thickness = 0.05f;
+        float width = leaf.Width / 2;
+        float height = leaf.Height;
+        float slit_length = leaf.LengthFenestrations;
+        float slit_thickness = leaf.ThicknessFenestrations * 0.04f * height;
+        float[] holes = leaf.Holes;
 
         Matrix rotated_matrix = Rotate(angle, rotation);
 
         List<List<Vector3>> positions = new();
 
-        positions.AddRange(LeafPositions(positions_start + rotated_matrix.x * 0.01f, rotated_matrix, leaf.Size.Item1 / 2, leaf.Size.Item2, slit_length, slit_thickness));
-        //positions.AddRange(LeafPositions(positions_start + rotated_matrix.x * 0.005f, rotated_matrix, width / 2, height, 0, 0));
+        positions.AddRange(LeafPositions(positions_start + rotated_matrix.x * 0.01f, rotated_matrix, width, height, slit_length, slit_thickness, holes));
 
-        AddLeafMeshComponents(positions, vertices, triangles, false);
+        //AddLeafMeshComponents(positions, vertices, triangles, false);
         AddLeafMeshComponents(positions, vertices, triangles, true);
     }
 
@@ -570,7 +534,8 @@ public class MeshFabricator : MonoBehaviour
         };
     }
 
-    List<List<Vector3>> LeafPositions(Vector3 pos_center, Matrix rotation, float width, float height, float slit_length, float slit_thickness)
+    // Creates the positions for the vertices of the outline of the leaf. Also calls the function to create 10 leaf slits at predetermined locations.
+    List<List<Vector3>> LeafPositions(Vector3 pos_center, Matrix rotation, float width, float height, float slit_length, float slit_thickness, float[] holes)
     {
         List<List<Vector3>> positions = new();
         List<Vector3> positions_basic = new();
@@ -595,21 +560,22 @@ public class MeshFabricator : MonoBehaviour
 
         positions.Add(positions_basic);
 
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * +0.08f, width * +1.00f), slit_length, slit_thickness, 25, 0, 0f), pos_center, rotation, width, height));
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.20f, width * +1.00f), slit_length, slit_thickness, -5, 0, 0.8f), pos_center, rotation, width, height));
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.40f, width * +0.90f), slit_length, slit_thickness, -20, 0, 0.8f), pos_center, rotation, width, height));
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.62f, width * +0.75f), slit_length, slit_thickness, -35, 0, 0.8f), pos_center, rotation, width, height));
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.88f, width * +0.40f), slit_length, slit_thickness, -65, 0, 0f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * +0.08f, width * +1.00f), slit_length, slit_thickness, 25, 0, holes[1]), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.20f, width * +1.00f), slit_length, slit_thickness, -5, 0, holes[3]), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.40f, width * +0.90f), slit_length, slit_thickness, -20, 0, holes[5]), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.62f, width * +0.75f), slit_length, slit_thickness, -35, 0, holes[7]), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.88f, width * +0.40f), slit_length, slit_thickness, -65, 0, holes[9]), pos_center, rotation, width, height));
         
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.92f, width * -0.35f), slit_length, slit_thickness, 245, 0, 0f), pos_center, rotation, width, height));
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.68f, width * -0.70f), slit_length, slit_thickness, 215, 0, 0f), pos_center, rotation, width, height));
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.45f, width * -0.87f), slit_length, slit_thickness, 200, 0, 0.8f), pos_center, rotation, width, height));
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.25f, width * -0.95f), slit_length, slit_thickness, 185, 0, 0.8f), pos_center, rotation, width, height));
-        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.00f, width * -1.00f), slit_length, slit_thickness, 160, 0, 0f), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.92f, width * -0.35f), slit_length, slit_thickness, 245, 0, holes[8]), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.68f, width * -0.70f), slit_length, slit_thickness, 215, 0, holes[6]), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.45f, width * -0.87f), slit_length, slit_thickness, 200, 0, holes[4]), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.25f, width * -0.95f), slit_length, slit_thickness, 185, 0, holes[2]), pos_center, rotation, width, height));
+        positions.Add(BendPositions(LeafSlit(new Vector3(0, height * -0.00f, width * -1.00f), slit_length, slit_thickness, 160, 0, holes[0]), pos_center, rotation, width, height));
 
         return positions;
     }
 
+    // Creates the positions for the vertices of a single leaf slit. The shear property is not utilized but could in theory adjust the vertices at the edge of the slit to make them align with the outline of the leaf.
     List<Vector3> LeafSlit(Vector3 pos_edge, float slit_length, float thickness, float angle, float shear, float hole_size)
     {
         List<Vector3> positions = new List<Vector3>();
@@ -648,13 +614,10 @@ public class MeshFabricator : MonoBehaviour
 
         positions.Add(new Vector3(0, pos_edge.y - tan * pos_edge.z, 0));
 
-        //Debug.Log(pos_edge + new Vector3(0, +thickness * cos - shear * sin, +thickness * sin - shear * cos));
-        //Debug.Log(pos_edge + new Vector3(0, +thickness * cos - (length * 2) / 3 * sin, +thickness * sin - (length * 2) / 3 * cos));
-        //Debug.Log(pos_edge + new Vector3(0, +thickness * 0.33f * cos - (length + thickness) * sin, +thickness * 0.33f * sin - (length + thickness) * cos));
-
         return positions;
     }
 
+    // Moves leaf vertices in the x axis to create the curvature of a leaf using a 2nd degree polynomial function. Also applies angle and roation.
     List<Vector3> BendPositions(List<Vector3> positions, Vector3 pos_center, Matrix rotation, float width, float height)
     {
         List<Vector3> positions_bent = new();
@@ -681,6 +644,7 @@ public class MeshFabricator : MonoBehaviour
         return positions_bent;
     }
 
+    // Generates a cube mesh for debugging. Unused in the final version.
     void GenerateCube(Matrix rotation, List<Vector3> vertices, List<int> triangles)
     {
         int vertice_index = vertices.Count;

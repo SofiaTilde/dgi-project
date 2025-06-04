@@ -16,8 +16,12 @@ public class LeafTester : MonoBehaviour
 
         leaf.Angle = 0;
         leaf.Rotation = 0;
-        leaf.Size = (1, 1);
-        leaf.Holes = (0, 0);
+        leaf.Width = 1f;
+        leaf.Height = 1f;
+        leaf.ThicknessFenestrations = 0.7f;
+        leaf.LengthFenestrations = 0.6f;
+        float[] holes = {0f, 0f, 0.8f, 0.8f, 0.8f, 0.8f, 0f, 0.8f, 0f, 0f };
+        leaf.Holes = holes;
 
         leaves.Add(leaf.ID, leaf);
 
