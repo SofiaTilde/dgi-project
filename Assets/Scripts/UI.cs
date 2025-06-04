@@ -21,15 +21,14 @@ public class UI : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        // Set variables to values of age- and lightslider
         ageValue = (int)sliderAge.value;
         lightValue = (int)sliderLight.value;
-
-        Debug.Log("Slider Age value: " + ageValue);
-        Debug.Log("Slider Light value: " + lightValue);
     }
 
     void OnClick()
     {
+        // Create instance of Program using the values 1-5 of age- and lightValue
         Program program = new Program(ageValue, lightValue);
         specimen.GetComponent<MeshFabricator>().GenerateSpecimenMesh(program.internodes, program.petioles, program.leaves);
     }

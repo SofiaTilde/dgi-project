@@ -14,6 +14,7 @@ namespace Classes
             Program program = new Program(int.Parse(args[0]), int.Parse(args[1]));
         }
 
+        // Function to generate random value
         public static int Rand(int start, int end)
         {
             System.Random rand = new System.Random();
@@ -27,7 +28,6 @@ namespace Classes
         public SortedDictionary<string, Petiole> petioles;
         public SortedDictionary<string, Leaf> leaves;
         public int pot; //1=small, 2=medium, 3=big
-        public float plantRoughLength;
         public int depth;
         public int Age; //1 to 5
         public int LightPower; //1 to 5
@@ -40,16 +40,22 @@ namespace Classes
             Age = age;
             LightPower = lightPower;
             System.Random rand = new System.Random();
+
+            // Determine plant depth, this number decreases with 1 for each internode added until reach top internode at depth 1
             depth = age * 2 + Start.Rand(0, 2);
+
+            // Create dictionaries for each plant part
             internodes = new SortedDictionary<string, Internode>();
             petioles = new SortedDictionary<string, Petiole>();
             leaves = new SortedDictionary<string, Leaf>();
+
+            // Start plant generation by adding first internode with name 'a' to internode dictionary
             internodes.Add(
                 "a",
                 new Internode(age, lightPower, "a", depth, ref internodes, ref petioles, ref leaves)
             );
 
-            plantRoughLength = 0;
+            // Code for testing purposes
             Console.WriteLine("Internodes:");
             foreach (KeyValuePair<string, Internode> kvp in internodes)
             {
@@ -59,7 +65,6 @@ namespace Classes
                 Console.Write(" Ang:" + kvp.Value.Angle);
                 Console.Write(" Rot:" + kvp.Value.Rotation);
                 Console.WriteLine();
-                plantRoughLength += kvp.Value.Length;
             }
             Console.WriteLine("\nPetioles:");
             foreach (KeyValuePair<string, Petiole> kvp in petioles)
@@ -81,9 +86,12 @@ namespace Classes
                 Console.WriteLine();
             }
 
+            // Initialise plant pots
             smallPot = GameObject.Find("small_pot");
             mediumPot = GameObject.Find("medium_pot");
             largePot = GameObject.Find("large_pot");
+
+            // Determine which pot is used for current plant based on total plant depth
             if (depth < 4)
             {
                 pot = 1;
@@ -105,6 +113,7 @@ namespace Classes
                 mediumPot.GetComponent<Renderer>().enabled = false;
                 largePot.GetComponent<Renderer>().enabled = true;
             }
+            // Code for testing purposes
             Console.WriteLine("\nPot: " + pot);
         }
     }
@@ -114,13 +123,12 @@ namespace Classes
         public float Thickness; //thickness
         public float Length; //length
 
-        //public Color MainColor;
-        public string ID;
-        public int Depth;
-        public int Angle; //0 to 45
-        public int Rotation; //-180 to 180
-        public string PetioleId;
-        public string InternodeId;
+        public string ID;   // ID/name of the current internode
+        public int Depth;   
+        public int Angle;   // 0 to 45, angle of internode in z-axis 
+        public int Rotation;    // -180 to 180, angle of internode in x/y-axis
+        public string PetioleId;    // ID for the petiole of this internode, which is the current internode's ID + 'p' for 'p'etiole
+        public string InternodeId;  // ID for the next internode following this internode, '' if no more internodes. 
 
         public Internode(
             int age,
@@ -134,10 +142,13 @@ namespace Classes
         {
             ID = id;
             Depth = depth;
+
+            // Generate measurements for current internode
             Length = 0.15f - (0.02f * lightPower);
             Thickness = 0.005f + (0.005f * age);
             Angle = Start.Rand(0, 45);
             Rotation = Start.Rand(-180, 180);
+
             PetioleId = ID + "p";
             petioles.Add(
                 PetioleId,
@@ -167,6 +178,7 @@ namespace Classes
                     )
                 );
             }
+            // Else this internode is top-internode and no more internodes are coming
             else
             {
                 InternodeId = "";
@@ -182,13 +194,12 @@ namespace Classes
         public float ThicknessStart;
         public float ThicknessEnd;
         public float WidthEnd;
-        public int Angle; //15 to 60
-        public int Rotation; //20 to 110 or 250 to 340
+        public int Angle; // 15 to 60, angle of petiole in z-axis 
+        public int Rotation; // 20 to 110 or 250 to 340, angle of petiole in x/y-axis
 
-        //public Color MainColor;
-        public string ID;
+        public string ID; // ID/name of the current petiole
         public int Depth;
-        public string LeafId;
+        public string LeafId; // ID of leaf connected to current petiole, ID of petiole plus 'l' for 'l'eaf
 
         public Petiole(
             int age,
@@ -202,6 +213,8 @@ namespace Classes
         {
             ID = id;
             Depth = depth;
+
+            // Generate measurements for current petiole
             ThicknessStart = 0.005f + (0.005f * age);
             ThicknessEnd = 0.003f + 0.001f * age;
             Length = 0.1625f + (0.0875f * age) - (Depth * 0.025f);
@@ -234,7 +247,6 @@ namespace Classes
     public class Leaf
     {
         public (int, int) Holes;
-
         /*
         for 10 different holes
         0-1 thickness (0%-100%)
@@ -244,12 +256,10 @@ namespace Classes
         public (float, float) Size; //width, height
         public int LeafModelId; //1-10
 
-        //public Color MainColor;
-        //public Color VeinColor;
-        public string ID;
+        public string ID; // ID/name of the current leaf
         public int Depth;
-        public int Angle;
-        public int Rotation;
+        public int Angle; // Same as for petiole
+        public int Rotation; // Same as for petiole
 
         public Leaf(
             int age,
@@ -267,6 +277,8 @@ namespace Classes
             Depth = depth;
             Angle = angle;
             Rotation = rotation;
+
+            // Generate measurements for current leaf
             LeafModelId = (age * 2) - (6 - lightPower) - (depth / 2) + Start.Rand(-1, 2);
             if (LeafModelId < 1)
             {
