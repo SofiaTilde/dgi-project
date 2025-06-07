@@ -145,7 +145,7 @@ namespace Classes
 
             // Generate measurements for current internode
             Length = 0.15f - (0.02f * lightPower);
-            Thickness = 0.005f + (0.005f * age);
+            Thickness = (0.005f + (0.005f * age))  * (0.75f + lightPower * 0.05f);
             Angle = Start.Rand(0, 45);
             Rotation = Start.Rand(-180, 180);
 
@@ -214,7 +214,7 @@ namespace Classes
             Depth = depth;
 
             // Generate measurements for current petiole
-            ThicknessStart = 0.005f + (0.005f * age);
+            ThicknessStart = (0.005f + (0.005f * age))  * (0.75f + lightPower * 0.05f);
             ThicknessEnd = 0.003f + 0.001f * age;
             Length = 0.1625f + (0.0875f * age) - (Depth * 0.025f);
             Angle = Start.Rand(15, 60);
@@ -247,7 +247,7 @@ namespace Classes
     {
         public float[] Holes; //10 different 0-1 hole size (0-100%)
 
-        /*
+        /* Guide for which index corresponds to which hole in the leaf mesj
              ||
         0(         )1
          2(       )3
@@ -283,7 +283,7 @@ namespace Classes
             Rotation = rotation;
 
             // Generate values for leaf measurements
-            Width = 0.0875f + (age * 0.0625f) - (Depth * 0.025f); // Test values
+            Width = (0.0875f + (age * 0.0625f) - (Depth * 0.025f)) * (0.75f + lightPower * 0.05f);
             Height = 1.1f * Width;
 
             Holes = new float[10];
@@ -334,8 +334,8 @@ namespace Classes
             int highestDepth = Depth + reverseDepth - 1;
             float percentOfPlant = ((float)reverseDepth) / ((float)highestDepth);
 
-            ThicknessFenestrations = hole;
-            LengthFenestrations = (hole / 10) * reverseDepth * 0.60f;
+            ThicknessFenestrations = hole  * (0.75f + lightPower * 0.05f);
+            LengthFenestrations = hole / 10 * reverseDepth * 0.60f;
             if (
                 ThicknessFenestrations < 0.3f
                 || LengthFenestrations < 0.0f
