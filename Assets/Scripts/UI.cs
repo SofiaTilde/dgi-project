@@ -2,6 +2,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Classes;
 using UnityEngine.UIElements;
+using TMPro;
 
 public class UI : MonoBehaviour
 {
@@ -14,6 +15,9 @@ public class UI : MonoBehaviour
     public int ageValue;
     public int lightValue;
 
+    [SerializeField] private TextMeshProUGUI ageSliderText = null;
+    [SerializeField] private TextMeshProUGUI lightSliderText = null;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -25,7 +29,9 @@ public class UI : MonoBehaviour
     {
         // Set variables to values of age- and lightslider
         ageValue = (int)sliderAge.value;
+        ageSliderText.text = ageValue.ToString("0");
         lightValue = (int)sliderLight.value;
+        lightSliderText.text = lightValue.ToString("0");
         light.GetComponent<Light>().intensity = lightValue * 0.2f + 0.5f;
     }
 
