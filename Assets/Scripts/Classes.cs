@@ -2,6 +2,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 
 //using OpenCover.Framework.Model;
 
@@ -34,6 +35,7 @@ namespace Classes
         private GameObject smallPot;
         private GameObject mediumPot;
         private GameObject largePot;
+        private GameObject platform;
 
         public Program(int age, int lightPower)
         {
@@ -90,27 +92,28 @@ namespace Classes
             smallPot = GameObject.Find("small_pot");
             mediumPot = GameObject.Find("medium_pot");
             largePot = GameObject.Find("large_pot");
+            platform = GameObject.Find("Platform");
+
+            smallPot.GetComponent<Renderer>().enabled = false;
+            mediumPot.GetComponent<Renderer>().enabled = false;
+            largePot.GetComponent<Renderer>().enabled = false;
+            platform.transform.position = new Vector3(0, -1.25f, 0.35f);
 
             // Determine which pot is used for current plant based on total plant depth
             if (depth < 4)
             {
                 pot = 1;
                 smallPot.GetComponent<Renderer>().enabled = true;
-                mediumPot.GetComponent<Renderer>().enabled = false;
-                largePot.GetComponent<Renderer>().enabled = false;
+                platform.transform.position = new Vector3(0, -1.15f, 0.35f);
             }
             else if (depth < 8)
             {
                 pot = 2;
-                smallPot.GetComponent<Renderer>().enabled = false;
                 mediumPot.GetComponent<Renderer>().enabled = true;
-                largePot.GetComponent<Renderer>().enabled = false;
             }
             else
             {
                 pot = 3;
-                smallPot.GetComponent<Renderer>().enabled = false;
-                mediumPot.GetComponent<Renderer>().enabled = false;
                 largePot.GetComponent<Renderer>().enabled = true;
             }
             // Code for testing purposes

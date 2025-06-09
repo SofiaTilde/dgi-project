@@ -11,7 +11,7 @@ public class UI : MonoBehaviour
     public UnityEngine.UI.Slider sliderAge;
     public UnityEngine.UI.Slider sliderLight;
     public GameObject specimen;
-    public GameObject light;
+    public new GameObject light;
     public int ageValue;
     public int lightValue;
 

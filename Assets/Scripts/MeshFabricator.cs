@@ -12,7 +12,7 @@ using UnityEditor.UI;
 
 public class MeshFabricator : MonoBehaviour
 {
-    // A 3x3 matrix used for rotations. 
+    // A 3x3 matrix consisting of 3 vectors. Ssed for rotations. 
     struct Matrix
     {
         public Vector3 x;
@@ -26,7 +26,7 @@ public class MeshFabricator : MonoBehaviour
         List<Vector3> vertices = new List<Vector3>();
         List<int> triangles = new List<int>();
 
-        // The ends of some generated components are saved and used as starting points for other components. 
+        // The end positions of some generated components are saved and used as starting points for other components. 
         List<Vector3> internode_ends = new List<Vector3> { new Vector3(0, 0, 0) };
         List<Vector3> petiole_ends = new ();
 
@@ -53,7 +53,7 @@ public class MeshFabricator : MonoBehaviour
             leaf_count++;
         }
         
-        // The mesh of the current specimen is replaced with a new one.
+        // The current mesh is replaced with the newly generated one.
         Mesh mesh = new();
         mesh.vertices = vertices.ToArray();
         mesh.triangles = triangles.ToArray();
@@ -63,18 +63,18 @@ public class MeshFabricator : MonoBehaviour
     }
 
     // Generates vertices and triangles for an internode at a given position.
-    Vector3 GenerateInternodeMesh(Internode internode, Vector3 positions_start, List<Vector3> vertices, List<int> triangles)
+    public Vector3 GenerateInternodeMesh(Internode internode, Vector3 positions_start, List<Vector3> vertices, List<int> triangles)
     {
         // The angle and rotation are converted to radians.
         float angle = internode.Angle * Mathf.Deg2Rad;
         float rotation = internode.Rotation * Mathf.Deg2Rad;
 
-        // Calculates a rotation matrix with the given angle and rotation
+        // Calculates a rotation matrix with the converted angle and rotation.
         Matrix rotated_matrix = Rotate(angle, rotation);
 
         List<Vector3> positions = new();
 
-        // The positions of the top and bottom vertices along with the bottom and top rings are stored. 
+        // The positions of the top and bottom vertices along with the bottom and top rings are calculated. 
         positions.Add(positions_start + (rotated_matrix.y * -internode.Thickness / 4));
         positions.Add(positions_start + (rotated_matrix.y * (internode.Length + internode.Thickness / 4)));
         positions.AddRange(OctagonPositions(positions_start, rotated_matrix, internode.Thickness / 2));
@@ -87,16 +87,16 @@ public class MeshFabricator : MonoBehaviour
         return positions_start + (rotated_matrix.y * internode.Length);
     }
 
-    // Fills the vertices and triangles lists with the generated internode positions and how they're stitced together into a mesh.
+    // Fills the vertices and triangles lists with the generated internode positions and how they're stitched together into a mesh.
     void AddInternodeMeshComponents(Vector3[] positions, List<Vector3> vertices, List<int> triangles)
     {
-        // Bottom and top points
+        // Bottom and top points.
         vertices.Add(positions[0]);
         vertices.Add(positions[1]);
 
         int vertice_index = vertices.Count;
 
-        // Adds one octagonal segment consisting of pieces of the top and bottom caps and one square side.
+        // Each iteration adds one octagonal segment consisting of pieces of the top and bottom caps and one square side piece.
         for (int t = 0; t < 8; t++)
         {
             // Bottom and top ring segments
@@ -126,18 +126,18 @@ public class MeshFabricator : MonoBehaviour
     }
 
     // Generates vertices and triangles for a petiole at a given position.
-    Vector3 GeneratePetioleMesh(Petiole petiole, Vector3 positions_start, List<Vector3> vertices, List<int> triangles)
+    public Vector3 GeneratePetioleMesh(Petiole petiole, Vector3 positions_start, List<Vector3> vertices, List<int> triangles)
     {
         // The angle and rotation are converted to radians.
         float angle = petiole.Angle * Mathf.Deg2Rad;
         float rotation = petiole.Rotation * Mathf.Deg2Rad;
 
-        // Calculates a rotation matrix with the given angle and rotation
+        // Calculates a rotation matrix with the converted angle and rotation.
         Matrix rotated_matrix = Rotate(angle, rotation);
 
         List<Vector3> positions = new();
 
-        // The positions of the base section, middle section, and end section are stored. The middle section is located one third of the total length from the base.
+        // The positions of the base section, middle section, and end section are calculated. The middle section extends one third of the total length from the base.
         positions.AddRange(BasePositions(positions_start, rotated_matrix, petiole.ThicknessStart / 2));
         positions.AddRange(MiddlePositions(positions_start + rotated_matrix.x * petiole.Length / 3, rotated_matrix, (petiole.ThicknessStart + petiole.ThicknessEnd) / 4));
         positions.AddRange(EndPositions(positions_start + rotated_matrix.x * petiole.Length, rotated_matrix, petiole.ThicknessEnd / 2));
@@ -149,7 +149,7 @@ public class MeshFabricator : MonoBehaviour
         return positions_start + (rotated_matrix.x * petiole.Length);
     }
 
-    // Fills the vertices and triangles lists with the generated petiole positions and how they're stitced together into a mesh.
+    // Fills the vertices and triangles lists with the generated petiole positions and how they're stitched together into a mesh.
     void AddPetioleMeshComponents(Vector3[] positions, List<Vector3> vertices, List<int> triangles)
     {
         int vertice_index = vertices.Count;
@@ -160,7 +160,7 @@ public class MeshFabricator : MonoBehaviour
             vertices.Add(positions[i]);
         }
 
-        // The triangles for the base.
+        // The triangles for the base
         for (int t = 0; t < 4; t++)
         {
             //Bowl
@@ -206,7 +206,7 @@ public class MeshFabricator : MonoBehaviour
             triangles.Add(vertice_index + verts_middle[i * 4 + 2]);
         }
 
-        // The only single triangle of this segment, located at the bottom.
+        // The only single triangle of this segment, located at the bottom, is added.
         triangles.Add(vertice_index + 1);
         triangles.Add(vertice_index + 16);
         triangles.Add(vertice_index + 15);
@@ -244,14 +244,14 @@ public class MeshFabricator : MonoBehaviour
         float angle = leaf.Angle * Mathf.Deg2Rad;
         float rotation = leaf.Rotation * Mathf.Deg2Rad;
 
-        // Leaf atributes are tweaked before 
+        // Some leaf atributes are tweaked before use. 
         float width = leaf.Width / 2;
         float height = leaf.Height;
         float fenestration_length = leaf.LengthFenestrations;
         float fenestration_thickness = leaf.ThicknessFenestrations * 0.04f * height;
         float[] holes = leaf.Holes;
 
-        // Calculates a rotation matrix with the given angle and rotation
+        // Calculates a rotation matrix with the converted angle and rotation.
         Matrix rotated_matrix = Rotate(angle, rotation);
 
         List<List<Vector3>> positions = new();
@@ -259,12 +259,12 @@ public class MeshFabricator : MonoBehaviour
         // All positions are added at once.
         positions.AddRange(LeafPositions(positions_start, rotated_matrix, width, height, fenestration_length, fenestration_thickness, holes));
 
-        // The positions are used to create vertices and triangles, once for the front side and once for the backside.
+        // The positions are used to create vertices and triangles, once for the frontside and once for the backside.
         AddLeafMeshComponents(positions, vertices, triangles, false);
         AddLeafMeshComponents(positions, vertices, triangles, true);
     }
 
-    // Fills the vertices and triangles lists with the generated leaf positions and how they're stitced together into a mesh. If invert is true, all triangles are flipped to face the opposite direction.
+    // Fills the vertices and triangles lists with the generated leaf positions and how they're stitched together into a mesh. If invert is true, all triangles are flipped to face the opposite direction.
     void AddLeafMeshComponents(List<List<Vector3>> positions, List<Vector3> vertices, List<int> triangles, bool invert)
     {
         int vertice_index = vertices.Count;
@@ -273,7 +273,7 @@ public class MeshFabricator : MonoBehaviour
         // The perimeter positions are added.
         vertices.AddRange(positions[0]);
 
-        // The fnestration positions are added.
+        // The fenestration positions are added.
         for (int i = 0; i < 10; i++)
         {
             vertices.AddRange(positions[i + 1]);
@@ -282,17 +282,17 @@ public class MeshFabricator : MonoBehaviour
         // A list of vertices are used to reduce the amount of repeated code when creating triangles.
         List<int> vertex_indexs;
 
-        // Every region between fenestrations and most of their individual triangles are generated here.
+        // Every region in between fenestrations and most of their individual triangles are added here.
         for (int i = 0; i < 9; ++i)
         {
-            // The triangles that belong to only one fenestration are generated.
+            // The triangles that belong to only one fenestration are added.
             vertex_indexs = new List<int>() { 4, 17, 10, 4, 5, 17, 13, 14, 18 };
             for (int j = 0; j < 9; j++)
             {
                 triangles.Add(vertice_index + 13 + i * 19 + vertex_indexs[j]);
             }
 
-            // The region between the bottom two fenestrations is different than most in between regions. That one is skipped and the rest are generated here.
+            // The region between the bottom two fenestrations is different than most 'in between' regions. That one is skipped and the rest are added here.
             if (i != 4)
             {
                 vertex_indexs = new List<int>()
@@ -330,6 +330,25 @@ public class MeshFabricator : MonoBehaviour
             triangles.Add(vertice_index + 13 + 5 * 19 + vertex_indexs[j + 7]);
             triangles.Add(vertice_index + 13 + 5 * 19 + vertex_indexs[j + 8]);
             triangles.Add(vertice_index + 7);
+        }
+
+        // Triangles that fill the gap at the bottom of the leaf are added.
+        vertex_indexs = new List<int>()
+        {
+            105, 5, 6,
+            119, 6, 7,
+            119, 105, 6,
+            105, 119, 104,
+            104, 119, 120,
+            104, 120, 103,
+            103, 120, 121,
+            103, 121, 126,
+            103, 126, 107,
+        };
+
+        for (int i = 0; i < 27; i++)
+        {
+            triangles.Add(vertice_index + vertex_indexs[i]);
         }
 
         // The top left fenestration is connected to the outline.
@@ -378,7 +397,7 @@ public class MeshFabricator : MonoBehaviour
             triangles.Add(vertice_index + vertex_indexs[i]);
         }
 
-        // Triangles that fill the gap at the top of the leaf are generated.
+        // Triangles that fill the gap at the top of the leaf are added.
         vertex_indexs = new List<int>()
         {
             0, 31, 12,
@@ -393,26 +412,7 @@ public class MeshFabricator : MonoBehaviour
             triangles.Add(vertice_index + vertex_indexs[i]);
         }
 
-        // Triangles that fill the gap at the bottom of the leaf are generated.
-        vertex_indexs = new List<int>()
-        {
-            105, 5, 6,
-            119, 6, 7,
-            119, 105, 6,
-            105, 119, 104,
-            104, 119, 120,
-            104, 120, 103,
-            103, 120, 121,
-            103, 121, 126,
-            103, 126, 107,
-        };
-
-        for (int i = 0; i < 27; i++)
-        {
-            triangles.Add(vertice_index + vertex_indexs[i]);
-        }
-
-        // If the generated mesh is meant to be the bask side all triangles have to be flipped. This is easily done by swapping places of any two vertices in a triangle.
+        // If the generated mesh is intended to be the backside, all triangles have to be flipped. This is easily done by swapping places of any two vertices in a triangle.
         if (invert)
         {
             int new_triangles = triangles.Count;
@@ -425,7 +425,7 @@ public class MeshFabricator : MonoBehaviour
         }
     }
 
-    // Applies an angle and then a rotation on top of that to an identity matrix and returns the resulting rotation matrix.
+    // Applies an angle and then a rotation to an identity matrix and returns the resulting rotation matrix.
     Matrix Rotate(float angle, float rotation)
     {
         Matrix rotated;
@@ -438,14 +438,14 @@ public class MeshFabricator : MonoBehaviour
         Vector3 y_angled = new Vector3(-Mathf.Sin(angle), Mathf.Cos(angle), 0);
         rotated.y = new Vector3(Mathf.Cos(rotation) * y_angled.x, y_angled.y, Mathf.Sin(rotation) * y_angled.x);
 
-        // The z vector stays the same when angled and therefore only needs to be rotated.
+        // The z vector stays the same when angled and is therefore only rotated.
         rotated.z = new Vector3(-Mathf.Sin(rotation), 0, Mathf.Cos(rotation));
 
         return rotated;
     }
 
-    // This function does the same as the above but for any matrix, not just the identity. It turns out to be a much more complicated operation and I spent hours on it before learning that we never need to perform this operation twice.
-    // It sort of works but causes minor errors that become apparent after multiple operations. The matix stop being an orthonormal set. This could be due to floating point errors, though that seems unlikely.
+    // This function does the same as the above but for any matrix, not just an identity. It turns out to be a much more complicated operation and I spent hours on it before learning that we never need to perform this operation more than once.
+    // It sort of works but causes minor errors that become apparent after multiple operations. The matrix stop being an orthonormal set, for instance. This could be due to floating point errors, though that seems unlikely.
     Matrix RotateHeadache(float angle, float rotation, Matrix identity)
     {
         Matrix rotated;
@@ -502,10 +502,10 @@ public class MeshFabricator : MonoBehaviour
     // Creates positions corresponting to the corners of an octagon.
     List<Vector3> OctagonPositions(Vector3 pos_center, Matrix rotation, float radius)
     {
-        // The length of half the side of an octagon given its radius i calculated in advance. 
+        // The length of half the side of an octagon, given its radius, is calculated in advance. 
         float side_half = radius / (1 + 2 / Mathf.Sqrt(2));
 
-        // All points of an octagon, with respect to a starting position and the rotated matrix, are calculated and returned in a list.
+        // All points of an octagon, with respect to a starting position and the rotation matrix, are calculated and returned in a list.
         return new List<Vector3>
         {
             pos_center + rotation.x * +radius + rotation.z * -side_half,
@@ -522,10 +522,10 @@ public class MeshFabricator : MonoBehaviour
     // Creates potisions for the base of a petiole.
     List<Vector3> BasePositions(Vector3 pos_center, Matrix rotation, float radius)
     {
-        // The length to the corner of an octagon given its radius i calculated in advance. (This calculation is incorrect. It was stolen from the function above and tweaked slightly. I could find the correct value but who really cares?)
+        // The length to the corner of an octagon, given its radiu,s is calculated in advance. (This calculation is incorrect. It was stolen from the function above and tweaked slightly. I could find the correct value but who really cares?)
         float corner = 1.6f * radius / (1 + 2 / Mathf.Sqrt(2));
 
-        // The positions of the base are calculated and returned in a list. The base has a similar pattern when viewved from above and below. Each pair in this list represents the upper and lower position that match in said pattern.
+        // The positions of the base are calculated and returned in a list. The base has a similar pattern when viewed from above and below. Each pair in this list represents the upper and lower position that match in said pattern.
         return new List<Vector3>
         {
             pos_center + rotation.y * radius * -0.5f,
@@ -589,7 +589,7 @@ public class MeshFabricator : MonoBehaviour
         List<List<Vector3>> positions = new();
         List<Vector3> positions_perimeter = new();
 
-        // The postions for the perimeter are manually determined.
+        // The positions for the perimeter are manually determined.
         positions_perimeter.Add(new Vector3(0, height * +0.00f, width * +0.03f));
         positions_perimeter.Add(new Vector3(0, height * +0.18f, width * +0.10f));
         positions_perimeter.Add(new Vector3(0, height * +0.20f, width * +0.40f));
@@ -610,7 +610,7 @@ public class MeshFabricator : MonoBehaviour
         positions_perimeter = BendPositions(positions_perimeter, pos_center, rotation, width, height);
         positions.Add(positions_perimeter);
 
-        // The postions for the fenestrations are manually determined. Each has a fixed angle. The shear feature is unused as it wasn't necessary.
+        // The positions for the fenestrations are manually determined. Each has a fixed angle. The shear feature is unused as it wasn't necessary.
         positions.Add(BendPositions(LeafFenestration(new Vector3(0, height * +0.08f, width * +1.00f), fenestration_length, fenestration_thickness, 25, 0, holes[1]), pos_center, rotation, width, height));
         positions.Add(BendPositions(LeafFenestration(new Vector3(0, height * -0.20f, width * +1.00f), fenestration_length, fenestration_thickness, -5, 0, holes[3]), pos_center, rotation, width, height));
         positions.Add(BendPositions(LeafFenestration(new Vector3(0, height * -0.40f, width * +0.90f), fenestration_length, fenestration_thickness, -20, 0, holes[5]), pos_center, rotation, width, height));
@@ -642,7 +642,7 @@ public class MeshFabricator : MonoBehaviour
         // The position of the hole between the central spine of the leaf and the fenestration is calculated in advance.
         Vector3 pos_hole = new(0, (pos_edge.y - tan * pos_edge.z + (pos_edge.y - sin * length)) / 2, (pos_edge.z - cos * length) / 2);
 
-        // The postions for the edge of the fenestration are calcualted.
+        // The positions for the edge of the fenestration are calcualted.
         positions.Add(pos_edge + new Vector3(0, +thickness * cos - shear * sin, -thickness * sin - shear * cos));
         positions.Add(pos_edge + new Vector3(0, +thickness * cos - (length * 1) / 3 * sin, -thickness * sin - (length * 1) / 3 * cos));
         positions.Add(pos_edge + new Vector3(0, +thickness * cos - (length * 2) / 3 * sin, -thickness * sin - (length * 2) / 3 * cos));
@@ -655,7 +655,7 @@ public class MeshFabricator : MonoBehaviour
         positions.Add(pos_edge + new Vector3(0, -thickness * cos - (length * 1) / 3 * sin, +thickness * sin - (length * 1) / 3 * cos));
         positions.Add(pos_edge + new Vector3(0, -thickness * cos + shear * sin, +thickness * sin + shear * cos));
 
-        // The postions for the hole are calcualted.
+        // The positions for the hole are calcualted.
         positions.Add(pos_hole + hole_size * new Vector3(0, +thickness * cos * 0.33f + thickness * sin * 1.60f, -thickness * sin * 0.33f + thickness * cos * 1.60f));
         positions.Add(pos_hole + hole_size * new Vector3(0, +thickness * cos * 1.00f + thickness * sin * 1.00f, -thickness * sin * 1.00f + thickness * cos * 1.00f));
         positions.Add(pos_hole + hole_size * new Vector3(0, +thickness * cos * 1.00f - thickness * sin * 1.00f, -thickness * sin * 1.00f - thickness * cos * 1.00f));
@@ -672,7 +672,7 @@ public class MeshFabricator : MonoBehaviour
         return positions;
     }
 
-    // Moves leaf vertices in the x axis to create the curvature of a leaf using a 2nd degree polynomial function. Also applies angle and roation.
+    // Moves leaf vertices in the x axis to create the curvature of a leaf using a quadratic polynomial. Also applies angle and roation.
     List<Vector3> BendPositions(List<Vector3> positions, Vector3 pos_center, Matrix rotation, float width, float height)
     {
         List<Vector3> positions_bent = new();
@@ -699,14 +699,14 @@ public class MeshFabricator : MonoBehaviour
             // The resulting depth is scaled to the size of the leaf.
             depth *= (height + width) / 2;
 
-            // The postions depth is adjusted and rotation is applied to it. 
+            // The positions depth is adjusted. Rotation is applied to it.
             positions_bent.Add(pos_center + rotation.z * position.z + rotation.y * position.y + rotation.x * depth);
         }
 
         return positions_bent;
     }
 
-    // Generates a cube mesh for debugging. It's unused in the final version. Ulike other functions in this script, the positions and mesh data are both created in this one function.
+    // Generates a cube mesh for debugging. It's unused in the final version. Unlike other functions in this script, the positions and mesh data are both created in the same function.
     void GenerateCube(Matrix rotation, List<Vector3> vertices, List<int> triangles)
     {
         int vertice_index = vertices.Count;
